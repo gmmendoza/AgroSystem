@@ -28,7 +28,7 @@ services:
       - key: DB_NAME
         fromDatabase:
           name: poo2-db
-          property: databaseName
+          property: database
 
 databases:
   - name: poo2-db
