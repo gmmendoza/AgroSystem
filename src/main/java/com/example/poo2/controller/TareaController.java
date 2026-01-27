@@ -81,8 +81,22 @@ public class TareaController {
     }
 
     @GetMapping("/historial")
-    public String listHistorial(Model model) {
-        model.addAttribute("tareas", tareaService.findAllRealizadas());
+    public String listHistorial(
+            @RequestParam(required = false) Long empleadoId,
+            @RequestParam(required = false) Long tipoTareaId,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            Model model) {
+
+        model.addAttribute("tareas", tareaService.filtrarTareas(empleadoId, tipoTareaId, fechaInicio, fechaFin));
+        model.addAttribute("empleados", empleadoService.findAll());
+        model.addAttribute("tiposTarea", tareaService.findAllTipos());
+
+        model.addAttribute("empleadoId", empleadoId);
+        model.addAttribute("tipoTareaId", tipoTareaId);
+        model.addAttribute("fechaInicio", fechaInicio);
+        model.addAttribute("fechaFin", fechaFin);
+
         return "tareas/historial";
     }
 

@@ -90,4 +90,9 @@ public class TareaService {
     public void eliminarTarea(Long id) {
         tareaRealizadaRepository.deleteById(id);
     }
+
+    public List<TareaRealizada> filtrarTareas(Long empleadoId, Long tipoTareaId, LocalDate fechaInicio,
+            LocalDate fechaFin) {
+        return tareaRealizadaRepository.findByFilters(empleadoId, tipoTareaId, fechaInicio, fechaFin);
+    }
 }

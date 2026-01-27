@@ -2,6 +2,11 @@ package com.example.poo2.model;
 
 import jakarta.persistence.*;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 /**
  * Entidad que representa a un Cliente del sistema.
  * Los clientes son las personas o empresas a quienes se les facturan
@@ -20,14 +25,19 @@ public class Cliente {
     private Long id;
 
     /** Nombre o razon social del cliente */
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 3, max = 100, message = "El nombre debe tener entre 3 y 100 caracteres")
     @Column(nullable = false)
     private String nombre;
 
     /** Numero de CUIT (unico para cada cliente) */
+    @NotBlank(message = "El CUIT es obligatorio")
+    @Size(min = 11, max = 13, message = "El CUIT debe tener 11 dígitos")
     @Column(unique = true, nullable = false)
     private String cuit;
 
     /** Condicion fiscal del cliente para calculo de IVA */
+    @NotNull(message = "La condición fiscal es obligatoria")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CondicionFiscal condicionFiscal;
@@ -36,6 +46,7 @@ public class Cliente {
     private String direccion;
 
     /** Correo electronico del cliente */
+    @Email(message = "El email debe ser válido")
     private String email;
 
     // Constructores

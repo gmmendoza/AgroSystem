@@ -33,6 +33,39 @@
             }
         }
     </script>
+
+    <style>
+        /* Toast Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        .toast-enter {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .toast-exit {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+    </style>
 </head>
 
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex flex-col">
@@ -154,6 +187,9 @@
     <!-- Main Content (flex-grow para sticky footer) -->
     <main class="flex-grow">
         <div class="container mx-auto px-4 py-8">
+            <!-- Breadcrumbs Placeholder -->
+            <div layout:fragment="breadcrumbs" class="mb-6"></div>
+
             <div layout:fragment="content" class="fade-in">
                 <!-- Content goes here -->
             </div>
@@ -170,6 +206,9 @@
             </div>
         </div>
     </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2"></div>
 
     <!-- Modal de Confirmación (Reutilizable) -->
     <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
@@ -203,8 +242,79 @@
     <!-- Custom JavaScript -->
     <script th:src="@{/js/app.js}"></script>
 
-    <!-- Modal Script -->
+    <!-- Toast & Loading Logic -->
     <script>
+        // Toast Function
+        function showToast(type, message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            // Colors and Icons based on type
+            let bgColor = 'bg-white';
+            let textColor = 'text-gray-800';
+            let icon = '';
+            let borderClass = '';
+
+            if (type === 'success') {
+                borderClass = 'border-l-4 border-green-500';
+                icon = `<svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            } else if (type === 'error') {
+                borderClass = 'border-l-4 border-red-500';
+                icon = `<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+            } else if (type === 'info') {
+                borderClass = 'border-l-4 border-blue-500';
+                icon = `<svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            }
+
+            toast.className = `toast-enter flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white rounded-lg shadow-lg ${borderClass}`;
+            toast.innerHTML = `
+                ${icon}
+                <div class="pl-2 text-sm font-normal text-gray-800">${message}</div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close" onclick="this.parentElement.remove()">
+                    <span class="sr-only">Close</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 5000);
+        }
+
+        // Loading State for Forms
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            // Skip if form has 'no-loading' class
+            if (form.classList.contains('no-loading')) return;
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                // Check if form is valid (HTML5 validation)
+                if (!form.checkValidity()) return;
+
+                const originalContent = submitBtn.innerHTML;
+                const originalWidth = submitBtn.offsetWidth;
+
+                submitBtn.style.width = `${originalWidth}px`; // Prevent resizing
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+                submitBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Procesando...
+                `;
+            }
+        });
+
+        // Modal Logic (Existing)
         let confirmCallback = null;
 
         function showConfirmModal(title, message, buttonText, callback) {
@@ -244,21 +354,14 @@
             closeConfirmModal();
         });
 
-        // Cerrar modal con Escape
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeConfirmModal();
-            }
+            if (e.key === 'Escape') closeConfirmModal();
         });
 
-        // Cerrar modal clickeando fuera
         document.getElementById('confirmModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeConfirmModal();
-            }
+            if (e.target === this) closeConfirmModal();
         });
 
-        // Función helper para eliminar con confirmación
         function confirmDelete(url, itemName) {
             showConfirmModal(
                 '¿Eliminar ' + itemName + '?',
@@ -269,6 +372,17 @@
                 }
             );
         }
+    </script>
+
+    <!-- Flash Messages to Toasts -->
+    <script th:if="${success}">
+        document.addEventListener('DOMContentLoaded', () => showToast('success', '[[${success}]]'));
+    </script>
+    <script th:if="${error}">
+        document.addEventListener('DOMContentLoaded', () => showToast('error', '[[${error}]]'));
+    </script>
+    <script th:if="${info}">
+        document.addEventListener('DOMContentLoaded', () => showToast('info', '[[${info}]]'));
     </script>
 </body>
 

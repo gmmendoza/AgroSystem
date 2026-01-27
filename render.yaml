@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: poo2-app
+    env: docker
+    plan: free
+    healthCheckPath: /login
+    envVars:
+      - key: SERVER_PORT
+        value: 8080
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: poo2-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: poo2-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: poo2-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: poo2-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: poo2-db
+          property: databaseName
+
+databases:
+  - name: poo2-db
+    databaseName: poo2_db
+    user: poo2_user
+    plan: free
+    ipAllowList: [] # Allow all IPs for simplicity, or restrict if needed

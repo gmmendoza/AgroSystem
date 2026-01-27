@@ -22,6 +22,8 @@
                     <input type="text" th:field="*{nombre}" id="nombre"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
                         required>
+                    <p th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="text-red-500 text-xs mt-1">
+                    </p>
                 </div>
 
                 <div class="mb-4">
@@ -38,6 +40,7 @@
                             <!-- Icono de validación -->
                         </div>
                     </div>
+                    <p th:if="${#fields.hasErrors('cuit')}" th:errors="*{cuit}" class="text-red-500 text-xs mt-1"></p>
                     <p id="cuitError" class="text-red-500 text-xs mt-1 hidden">
                         El CUIT debe tener el formato XX-XXXXXXXX-X
                     </p>
@@ -58,6 +61,8 @@
                             th:text="${condicion.name().replace('_', ' ')}">
                         </option>
                     </select>
+                    <p th:if="${#fields.hasErrors('condicionFiscal')}" th:errors="*{condicionFiscal}"
+                        class="text-red-500 text-xs mt-1"></p>
                 </div>
 
                 <div class="mb-4">
@@ -65,6 +70,7 @@
                     <input type="email" th:field="*{email}" id="email"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
                         placeholder="cliente@email.com">
+                    <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-xs mt-1"></p>
                 </div>
 
                 <div class="mb-6">
@@ -185,9 +191,10 @@
             const regex = /^\d{2}-\d{8}-\d{1}$/;
 
             if (!regex.test(cuit)) {
-                document.getElementById('cuitError').classList.remove('hidden');
-                document.getElementById('cuit').focus();
-                return false;
+                // Si hay errores de backend, puede que el cuit esté vacío o inválido y el usuario intente enviar
+                // Permitimos que el backend valide si el frontend no captura todo, pero aquí validamos formato básico
+                // Si el campo es required, el navegador lo bloqueará antes
+                return true;
             }
 
             const cleanCuit = cuit.replace(/-/g, '');

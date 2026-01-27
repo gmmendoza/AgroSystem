@@ -29,8 +29,15 @@ public class ClienteController {
     }
 
     @PostMapping("/guardar")
-    public String save(@ModelAttribute Cliente cliente) {
+    public String save(@jakarta.validation.Valid @ModelAttribute Cliente cliente,
+            org.springframework.validation.BindingResult result, Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            model.addAttribute("condicionesFiscales", CondicionFiscal.values());
+            return "clientes/form";
+        }
         clienteService.save(cliente);
+        redirectAttributes.addFlashAttribute("success", "Cliente guardado correctamente.");
         return "redirect:/clientes";
     }
 
