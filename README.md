@@ -1,172 +1,166 @@
 # AgroSystem - Sistema de Gestión Agrícola
 
-![AgroSystem - Sistema de Gestión Agrícola](docs/screenshot.png)
+<div align="center">
 
-Sistema de facturación y gestión de servicios agrícolas desarrollado con Spring Boot.
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-6DB33F?style=for-the-badge&logo=spring-boot)
+![Java](https://img.shields.io/badge/Java-17-007396?style=for-the-badge&logo=java)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
+
+Sistema integral de facturación y gestión de servicios agrícolas desarrollado con Spring Boot.
+
+[Ver Demo](#instrucciones-de-ejecución) • [Documentación](docs/) • [Reportar Bug](https://github.com/gmmendoza/AgroSystem/issues)
+
+</div>
+
+---
 
 ## Características
 
-- ✅ Gestión de Clientes (ABM completo)
-- ✅ Gestión de Empleados (ABM completo)
-- ✅ Configuración de Tipos de Tareas y Precios Históricos
-- ✅ Registro de Actividades con cálculo automático de precios
-- ✅ Dashboard con estadísticas en tiempo real
-- ✅ Historial de actividades realizadas
-- ✅ Interfaz moderna y responsiva
+### Autenticación y Seguridad
+- Sistema de login con Spring Security
+- Roles de usuario (ADMIN, ENCARGADO, OPERARIO)
+- Gestión de perfil y cambio de contraseña
+
+### Dashboard Inteligente
+- Estadísticas en tiempo real
+- Gráficos con Chart.js (actividades por mes)
+- Top 5 empleados más productivos
+- Resumen de actividades del día
+
+### Gestión Completa
+- **Clientes**: ABM con validación CUIT (algoritmo AFIP)
+- **Empleados**: ABM con legajo y puesto
+- **Tareas**: Tipos configurables con precios históricos
+- **Actividades**: Registro con cálculo automático de precios
+
+### Interfaz Moderna
+- Diseño responsivo con Tailwind CSS
+- Búsqueda, paginación y ordenamiento en listados
+- Modales de confirmación animados
+- Feedback visual en formularios
+- Dark mode ready
+
+---
 
 ## Stack Tecnológico
 
-- **Backend**: Spring Boot 3.2.2, Spring Data JPA, Spring Security
-- **Base de Datos**: PostgreSQL 15
-- **Frontend**: Thymeleaf, Tailwind CSS, JavaScript
-- **Contenedorización**: Docker & Docker Compose
+| Categoría | Tecnología |
+|-----------|------------|
+| **Backend** | Spring Boot 3.2.2, Spring Data JPA, Spring Security |
+| **Base de Datos** | PostgreSQL 15 |
+| **Frontend** | Thymeleaf, Tailwind CSS, JavaScript, Chart.js |
+| **Contenedorización** | Docker & Docker Compose |
 
-## Requisitos Previos
-
-### Opción 1: Ejecución con Docker (Recomendado)
-- Docker Desktop instalado
-- Docker Compose
-
-### Opción 2: Ejecución Local
-- Java 17 o superior
-- Maven 3.6+
-- PostgreSQL 15+
+---
 
 ## Instrucciones de Ejecución
 
-### 🐳 Con Docker (Recomendado)
+### Con Docker (Recomendado)
 
-1. **Clonar el repositorio**
-   ```bash
-   cd Poo2
-   ```
+```bash
+# Clonar el repositorio
+git clone https://github.com/gmmendoza/AgroSystem.git
+cd AgroSystem
 
-2. **Construir y ejecutar con Docker Compose**
-   ```bash
-   docker-compose up --build
-   ```
+# Construir y ejecutar
+docker-compose up --build
 
-3. **Acceder a la aplicación**
-   - Abrir navegador en: `http://localhost:8080`
-   - La base de datos PostgreSQL estará disponible en: `localhost:5432`
+# Acceder en http://localhost:8080
+```
 
-4. **Detener la aplicación**
-   ```bash
-   docker-compose down
-   ```
+### Ejecución Local
 
-5. **Detener y eliminar volúmenes (reinicio completo)**
-   ```bash
-   docker-compose down -v
-   ```
+```bash
+# Requisitos: Java 17+, Maven 3.6+, PostgreSQL 15+
 
-### 💻 Ejecución Local
+# Configurar PostgreSQL
+# - Base de datos: poo2_db
+# - Usuario: postgres
+# - Contraseña: postgres
 
-1. **Configurar PostgreSQL**
-   - Crear base de datos: `poo2_db`
-   - Usuario: `postgres`
-   - Contraseña: `postgres`
+# Ejecutar
+./mvnw spring-boot:run
+```
 
-2. **Configurar `application.properties`**
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/poo2_db
-   spring.datasource.username=postgres
-   spring.datasource.password=tu_password
-   ```
+**Credenciales por defecto:**
+- Usuario: `admin`
+- Contraseña: `admin`
 
-3. **Ejecutar la aplicación**
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-   
-   O en Windows:
-   ```powershell
-   .\mvnw.cmd spring-boot:run
-   ```
-
-4. **Acceder a la aplicación**
-   - Abrir navegador en: `http://localhost:8080`
+---
 
 ## Estructura del Proyecto
 
 ```
-Poo2/
-├── docs/                       # Documentación del proyecto
-│   ├── erp.md                 # Especificación de requisitos
-│   ├── roadmap.md             # Planificación de iteraciones
-│   └── dp-iteracion-1.md      # Diseño iteración 1
-├── src/
-│   ├── main/
-│   │   ├── java/com/example/poo2/
-│   │   │   ├── config/        # Configuración (Security)
-│   │   │   ├── controller/    # Controladores web
-│   │   │   ├── model/         # Entidades JPA
-│   │   │   ├── repository/    # Repositorios
-│   │   │   ├── service/       # Lógica de negocio
-│   │   │   └── Poo2Application.java
-│   │   └── resources/
-│   │       ├── static/        # CSS y JS personalizados
-│   │       ├── templates/     # Vistas Thymeleaf
-│   │       └── application.properties
-│   └── test/
-├── Dockerfile                  # Configuración Docker
-├── docker-compose.yml          # Orquestación de servicios
-├── init.sql                    # Script de inicialización DB
-├── pom.xml                     # Dependencias Maven
+AgroSystem/
+├── 📂 docs/                    # Documentación
+│   ├── erp.md                  # Requisitos del sistema
+│   ├── roadmap.md              # Planificación de iteraciones
+│   └── dp-iteracion-1.md       # Diseño detallado
+├── 📂 src/main/java/.../
+│   ├── config/                 # Security, Web Config
+│   ├── controller/             # Controladores MVC
+│   ├── model/                  # Entidades JPA
+│   ├── repository/             # Repositorios de datos
+│   └── service/                # Lógica de negocio
+├── 📂 src/main/resources/
+│   ├── templates/              # Vistas Thymeleaf
+│   └── static/                 # CSS y JS
+├── Dockerfile
+├── docker-compose.yml
 └── README.md
 ```
 
-## Modelo de Datos
+---
 
-- **Cliente**: Datos del cliente y condición fiscal
-- **Empleado**: Información de empleados
-- **TipoTarea**: Definición de tipos de tareas (Cosecha, Limpieza, etc.)
-- **PrecioTarea**: Precios históricos por tipo de tarea
-- **TareaRealizada**: Registro de actividades con precio aplicado
+## Funcionalidades por Iteración
 
-## Funcionalidades Principales
+### Iteración 1 (Completada)
 
-### Dashboard
-- Estadísticas en tiempo real
-- Total de clientes, empleados y actividades
-- Suma total a pagar por tareas realizadas
-- Actividades recientes
-- Accesos rápidos a funciones principales
+| Funcionalidad | Estado |
+|---------------|--------|
+| Sticky footer y modal de confirmación | ✅ |
+| Búsqueda, paginación y ordenamiento | ✅ |
+| Validación CUIT con algoritmo AFIP | ✅ |
+| Dashboard con Chart.js y métricas | ✅ |
+| Edición/eliminación de actividades | ✅ |
+| Perfil de usuario y cambio de contraseña | ✅ |
 
-### Gestión de Clientes
-- Crear, editar y eliminar clientes
-- Registro de condición fiscal (IVA)
-- Campos: Nombre, CUIT, Condición Fiscal, Email, Dirección
-
-### Gestión de Empleados
-- Crear, editar y eliminar empleados
-- Campos: Nombre, Legajo, Puesto
-
-### Configuración de Tareas
-- Definir tipos de tareas con unidad de medida
-- Gestionar precios históricos con vigencia por fecha
-- El sistema selecciona automáticamente el precio correcto según la fecha
-
-### Registro de Actividades
-- Selección de empleado y tipo de tarea
-- Ingreso de fecha y cantidad
-- **Cálculo automático** del precio basado en precios históricos
-- Historial completo de todas las actividades
-
-## Próximas Funcionalidades (Iteración 2)
+### Iteración 2 (Próximamente)
 
 - [ ] Facturación Individual
 - [ ] Facturación Masiva por período
 - [ ] Registro de Pagos
-- [ ] Anulación de Facturas (Notas de Crédito)
-- [ ] Reportes avanzados de liquidación
+- [ ] Notas de Crédito
+- [ ] Reportes de liquidación
+
+---
 
 ## Desarrollado por
 
-- [Tu Nombre]
-- Universidad: [Tu Universidad]
-- Materia: Programación Orientada a Objetos II
+<div align="center">
+
+### **Guadalupe Mendoza**
+
+**Cátedra:** Programación Orientada a Objetos II
+
+**Institución:** Facultad de Ciencias Exactas, Químicas y Naturales
+
+**Universidad Nacional de Misiones** (UNaM)
+
+**Año:** 2026
+
+</div>
+
+---
 
 ## Licencia
 
-Proyecto académico - 2026
+Este es un proyecto académico desarrollado como trabajo práctico para la cátedra de Programación Orientada a Objetos II.
+
+---
+
+<div align="center">
+
+</div>
