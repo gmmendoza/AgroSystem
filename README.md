@@ -1,5 +1,7 @@
 # AgroSystem - Sistema de Gestión Agrícola
 
+![AgroSystem - Sistema de Gestión Agrícola](docs/screenshot.png)
+
 Sistema de facturación y gestión de servicios agrícolas desarrollado con Spring Boot.
 
 ## Características
