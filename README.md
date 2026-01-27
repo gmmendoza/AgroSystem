@@ -8,6 +8,8 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
 
+![AgroSystem Screenshot](docs/screenshot.png)
+
 Sistema integral de facturación y gestión de servicios agrícolas desarrollado con Spring Boot.
 
 [Ver Demo](#instrucciones-de-ejecución) • [Documentación](docs/) • [Reportar Bug](https://github.com/gmmendoza/AgroSystem/issues)
