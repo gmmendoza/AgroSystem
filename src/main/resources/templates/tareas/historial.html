@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+
+<head>
+    <title>Historial de Actividades</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Historial de Actividades</h1>
+            <a href="/tareas/registro" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Registrar Nueva
+            </a>
+        </div>
+
+        <div class="bg-white shadow-md rounded my-6 overflow-x-auto">
+            <table class="min-w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Fecha</th>
+                        <th class="py-3 px-6 text-left">Empleado</th>
+                        <th class="py-3 px-6 text-left">Tarea</th>
+                        <th class="py-3 px-6 text-right">Cantidad</th>
+                        <th class="py-3 px-6 text-right">Precio Unit.</th>
+                        <th class="py-3 px-6 text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm font-light">
+                    <tr th:each="tarea : ${tareas}" class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 text-left whitespace-nowrap">
+                            <span th:text="${tarea.fecha}">2023-01-01</span>
+                        </td>
+                        <td class="py-3 px-6 text-left">
+                            <span th:text="${tarea.empleado.nombre}">Juan</span>
+                        </td>
+                        <td class="py-3 px-6 text-left">
+                            <span th:text="${tarea.tipoTarea.descripcion}">Cosecha</span>
+                        </td>
+                        <td class="py-3 px-6 text-right">
+                            <span th:text="${tarea.cantidad + ' ' + tarea.tipoTarea.unidadMedida}">500 KILO</span>
+                        </td>
+                        <td class="py-3 px-6 text-right">
+                            <span th:text="${'$ ' + tarea.precioAplicado}">$ 50.00</span>
+                        </td>
+                        <td class="py-3 px-6 text-right font-bold">
+                            <span th:text="${'$ ' + (tarea.cantidad * tarea.precioAplicado)}">$ 25000.00</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

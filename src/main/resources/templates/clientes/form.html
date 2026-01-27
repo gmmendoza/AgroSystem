@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+
+<head>
+    <title>Formulario de Cliente</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="max-w-lg mx-auto bg-white p-8 rounded shadow">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800"
+                th:text="${cliente.id == null ? 'Nuevo Cliente' : 'Editar Cliente'}">Nuevo Cliente</h2>
+
+            <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post">
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="nombre">Nombre</label>
+                    <input type="text" th:field="*{nombre}" id="nombre"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="cuit">CUIT</label>
+                    <input type="text" th:field="*{cuit}" id="cuit"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="condicionFiscal">Condición
+                        Fiscal</label>
+                    <select th:field="*{condicionFiscal}" id="condicionFiscal"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="Responsable Inscripto">Responsable Inscripto</option>
+                        <option value="Monotributista">Monotributista</option>
+                        <option value="Exento">Exento</option>
+                        <option value="Consumidor Final">Consumidor Final</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
+                    <input type="email" th:field="*{email}" id="email"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="direccion">Dirección</label>
+                    <input type="text" th:field="*{direccion}" id="direccion"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <button type="submit"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Guardar
+                    </button>
+                    <a href="/clientes"
+                        class="inline-block align-baseline font-bold text-sm text-green-500 hover:text-green-800">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

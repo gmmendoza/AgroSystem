@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+
+<head>
+    <title>Documentacion - AgroSystem</title>
+    <style>
+        /* Estilos para el contenido Markdown */
+        .markdown-content {
+            line-height: 1.8;
+            color: #374151;
+        }
+
+        .markdown-content h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .markdown-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .markdown-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .markdown-content p {
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .markdown-content code {
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+        }
+
+        .markdown-content pre {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content th,
+        .markdown-content td {
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .markdown-content th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+
+        .markdown-content hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 2rem 0;
+        }
+
+        .markdown-content strong {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .markdown-content a {
+            color: #16a34a;
+            text-decoration: underline;
+        }
+
+        .markdown-content a:hover {
+            color: #15803d;
+        }
+
+        /* Tabs */
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background-color: #16a34a;
+            color: white;
+        }
+
+        .tab-button:not(.active):hover {
+            background-color: #f3f4f6;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <!-- Heroicon: document-text -->
+                <svg class="w-10 h-10 text-green-600 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Documentacion del Proyecto</h1>
+                    <p class="text-gray-600">AgroSystem - Sistema de Gestion Agricola</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje de error si existe -->
+        <div th:if="${error}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+            <div class="flex items-center">
+                <!-- Heroicon: exclamation-circle -->
+                <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-red-700 font-medium" th:text="${error}">Error</span>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="flex border-b border-gray-200">
+                <button onclick="showTab('erp')" id="tab-erp"
+                    class="tab-button active flex items-center px-6 py-4 font-semibold text-gray-700">
+                    <!-- Heroicon: clipboard-document-list -->
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
+                    ERP (Requisitos)
+                </button>
+                <button onclick="showTab('dp')" id="tab-dp"
+                    class="tab-button flex items-center px-6 py-4 font-semibold text-gray-700">
+                    <!-- Heroicon: document-chart-bar -->
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Diseno y Planificacion
+                </button>
+                <button onclick="showTab('retro')" id="tab-retro"
+                    class="tab-button flex items-center px-6 py-4 font-semibold text-gray-700">
+                    <!-- Heroicon: light-bulb -->
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                        </path>
+                    </svg>
+                    Retrospectiva
+                </button>
+                <button onclick="showTab('roadmap')" id="tab-roadmap"
+                    class="tab-button flex items-center px-6 py-4 font-semibold text-gray-700">
+                    <!-- Heroicon: map -->
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                        </path>
+                    </svg>
+                    Roadmap
+                </button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="p-8">
+                <!-- ERP Content -->
+                <div id="content-erp" class="tab-content active">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-green-100 p-3 rounded-lg mr-4">
+                            <!-- Heroicon: document-text -->
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Especificacion de Requisitos (ERP)</h2>
+                            <p class="text-gray-600">Requisitos funcionales y no funcionales del sistema</p>
+                        </div>
+                    </div>
+                    <div class="markdown-content bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <pre th:text="${erp}"
+                            style="white-space: pre-wrap; background: transparent; color: inherit; font-family: inherit;"></pre>
+                    </div>
+                </div>
+
+                <!-- DP Content -->
+                <div id="content-dp" class="tab-content">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-blue-100 p-3 rounded-lg mr-4">
+                            <!-- Heroicon: presentation-chart-bar -->
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 13v-1m4 1v-3m4 3V8M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Diseno y Planificacion - Iteracion 1</h2>
+                            <p class="text-gray-600">Diagrama de clases, wireframes, casos de uso e historias de usuario
+                            </p>
+                        </div>
+                    </div>
+                    <div class="markdown-content bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <pre th:text="${dpIteracion1}"
+                            style="white-space: pre-wrap; background: transparent; color: inherit; font-family: inherit;"></pre>
+                    </div>
+                </div>
+
+                <!-- Retrospectiva Content -->
+                <div id="content-retro" class="tab-content">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-purple-100 p-3 rounded-lg mr-4">
+                            <!-- Heroicon: chat-bubble-left-right -->
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Retrospectiva - Iteracion 1</h2>
+                            <p class="text-gray-600">Lo que hicimos bien, lo que nos costo y mejoras para la proxima</p>
+                        </div>
+                    </div>
+                    <div class="markdown-content bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <pre th:text="${retrospectiva}"
+                            style="white-space: pre-wrap; background: transparent; color: inherit; font-family: inherit;"></pre>
+                    </div>
+                </div>
+
+                <!-- Roadmap Content -->
+                <div id="content-roadmap" class="tab-content">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-orange-100 p-3 rounded-lg mr-4">
+                            <!-- Heroicon: rocket-launch -->
+                            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Roadmap del Proyecto</h2>
+                            <p class="text-gray-600">Planificacion de iteraciones y funcionalidades futuras</p>
+                        </div>
+                    </div>
+                    <div class="markdown-content bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <pre th:text="${roadmap}"
+                            style="white-space: pre-wrap; background: transparent; color: inherit; font-family: inherit;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="bg-gray-100 p-3 rounded-lg mr-4">
+                    <!-- Heroicon: information-circle -->
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-gray-700">
+                        <span class="font-semibold">Desarrollado por:</span> Guadalupe Mendoza
+                    </p>
+                    <p class="text-gray-500 text-sm">
+                        Programacion Orientada a Objetos II - 2026
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript para tabs -->
+    <script th:inline="javascript">
+        function showTab(tabName) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Desactivar todos los botones
+            document.querySelectorAll('.tab-button').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Mostrar el contenido seleccionado
+            document.getElementById('content-' + tabName).classList.add('active');
+
+            // Activar el boton seleccionado
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

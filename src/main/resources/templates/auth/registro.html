@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - AgroSystem</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-image: url('/images/register-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .login-input {
+            background: rgba(249, 250, 251, 0.8);
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .login-input:focus {
+            border-color: #0d9488;
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15);
+            background: white;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #0d9488 0%, #059669 50%, #047857 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.35);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-400 {
+            animation-delay: 0.4s;
+        }
+
+        .bg-overlay {
+            background: rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen flex items-center justify-center px-4 py-12 bg-overlay">
+        <div class="w-full max-w-md">
+
+            <!-- Logo y Titulo -->
+            <div class="text-center mb-8 animate-fadeInUp">
+                <div
+                    class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-2xl mb-6 animate-float">
+                    <svg class="w-12 h-12 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                        </path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2 drop-shadow-lg">Crear Cuenta</h1>
+                <p class="text-teal-100 drop-shadow">Registrate en AgroSystem</p>
+            </div>
+
+            <!-- Card de Registro -->
+            <div class="glass-card rounded-3xl shadow-2xl p-8 animate-fadeInUp delay-100">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-2">Registro</h2>
+                <p class="text-gray-500 text-center mb-6">Completa tus datos para crear una cuenta</p>
+
+                <!-- Mensaje de Error -->
+                <div th:if="${error}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg animate-fadeInUp">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-red-700 font-medium" th:text="${error}">Error</span>
+                    </div>
+                </div>
+
+                <!-- Formulario -->
+                <form th:action="@{/registro}" method="post" class="space-y-4">
+                    <!-- Nombre Completo -->
+                    <div class="animate-fadeInUp delay-200">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="nombreCompleto">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                                    </path>
+                                </svg>
+                                Nombre Completo
+                            </span>
+                        </label>
+                        <input type="text" id="nombreCompleto" name="nombreCompleto" required
+                            class="login-input w-full px-4 py-3 rounded-xl outline-none" placeholder="Ej: Juan Perez">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="animate-fadeInUp delay-200">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="email">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                Correo Electronico
+                            </span>
+                        </label>
+                        <input type="email" id="email" name="email" required
+                            class="login-input w-full px-4 py-3 rounded-xl outline-none"
+                            placeholder="correo@ejemplo.com">
+                    </div>
+
+                    <!-- Username -->
+                    <div class="animate-fadeInUp delay-300">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="username">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Nombre de Usuario
+                            </span>
+                        </label>
+                        <input type="text" id="username" name="username" required
+                            class="login-input w-full px-4 py-3 rounded-xl outline-none" placeholder="Ej: juanperez">
+                    </div>
+
+                    <!-- Password -->
+                    <div class="animate-fadeInUp delay-300">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="password">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                    </path>
+                                </svg>
+                                Contrasena
+                            </span>
+                        </label>
+                        <input type="password" id="password" name="password" required minlength="6"
+                            class="login-input w-full px-4 py-3 rounded-xl outline-none"
+                            placeholder="Minimo 6 caracteres">
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="animate-fadeInUp delay-400">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="confirmPassword">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                    </path>
+                                </svg>
+                                Confirmar Contrasena
+                            </span>
+                        </label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6"
+                            class="login-input w-full px-4 py-3 rounded-xl outline-none"
+                            placeholder="Repite tu contrasena">
+                    </div>
+
+                    <button type="submit"
+                        class="btn-register w-full py-4 text-white font-bold rounded-xl text-lg shadow-lg mt-6">
+                        Crear Cuenta
+                    </button>
+                </form>
+
+                <!-- Link a Login -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-center text-gray-600 mb-3">
+                        Ya tienes una cuenta?
+                    </p>
+                    <a href="/login"
+                        class="block w-full py-3 text-center text-teal-600 font-semibold border-2 border-teal-500 rounded-xl hover:bg-teal-50 transition-all duration-300">
+                        Iniciar sesion
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <p class="mt-8 text-center text-white/80 text-sm animate-fadeInUp delay-400 drop-shadow">
+                &copy; 2026 AgroSystem - Guadalupe Mendoza
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesion - AgroSystem</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-image: url('/images/login-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .login-input {
+            background: rgba(249, 250, 251, 0.8);
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .login-input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+            background: white;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(22, 163, 74, 0.35);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+
+        .bg-overlay {
+            background: rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen flex items-center justify-center px-4 py-12 bg-overlay">
+        <div class="w-full max-w-md">
+
+            <!-- Logo y Titulo -->
+            <div class="text-center mb-8 animate-fadeInUp">
+                <div
+                    class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-2xl mb-6 animate-float">
+                    <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2 drop-shadow-lg">AgroSystem</h1>
+                <p class="text-green-100 drop-shadow">Sistema de Gestion Agricola</p>
+            </div>
+
+            <!-- Card de Login -->
+            <div class="glass-card rounded-3xl shadow-2xl p-8 animate-fadeInUp delay-100">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-2">Bienvenido</h2>
+                <p class="text-gray-500 text-center mb-8">Ingresa tus credenciales para continuar</p>
+
+                <!-- Mensaje de Error -->
+                <div th:if="${error}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg animate-fadeInUp">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-red-700 font-medium" th:text="${error}">Error</span>
+                    </div>
+                </div>
+
+                <!-- Mensaje de Logout/Success -->
+                <div th:if="${message}"
+                    class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg animate-fadeInUp">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-green-700 font-medium" th:text="${message}">Mensaje</span>
+                    </div>
+                </div>
+
+                <!-- Mensaje de Success (registro) -->
+                <div th:if="${success}"
+                    class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg animate-fadeInUp">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-green-700 font-medium" th:text="${success}">Exito</span>
+                    </div>
+                </div>
+
+                <!-- Formulario -->
+                <form th:action="@{/login}" method="post" class="space-y-6">
+                    <div class="animate-fadeInUp delay-200">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="username">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Usuario
+                            </span>
+                        </label>
+                        <input type="text" id="username" name="username" required
+                            class="login-input w-full px-4 py-3 rounded-xl outline-none"
+                            placeholder="Ingresa tu usuario">
+                    </div>
+
+                    <div class="animate-fadeInUp delay-300">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="password">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                    </path>
+                                </svg>
+                                Contrasena
+                            </span>
+                        </label>
+                        <input type="password" id="password" name="password" required
+                            class="login-input w-full px-4 py-3 rounded-xl outline-none"
+                            placeholder="Ingresa tu contrasena">
+                    </div>
+
+                    <button type="submit"
+                        class="btn-login w-full py-4 text-white font-bold rounded-xl text-lg shadow-lg">
+                        Iniciar Sesion
+                    </button>
+                </form>
+
+                <!-- Link a Registro -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <p class="text-center text-gray-600 mb-3">
+                        No tienes una cuenta?
+                    </p>
+                    <a href="/registro"
+                        class="block w-full py-3 text-center text-green-600 font-semibold border-2 border-green-500 rounded-xl hover:bg-green-50 transition-all duration-300">
+                        Crear cuenta nueva
+                    </a>
+                    <p class="text-center text-sm text-gray-400 mt-4">
+                        <span class="font-medium">Credenciales de prueba:</span>
+                        admin / admin123
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <p class="mt-8 text-center text-white/80 text-sm animate-fadeInUp delay-300 drop-shadow">
+                &copy; 2026 AgroSystem - Guadalupe Mendoza
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>
