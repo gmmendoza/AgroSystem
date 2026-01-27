@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+
+<head>
+    <title>Mi Perfil</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Mi Perfil</h1>
+                <p class="text-gray-600">Gestiona tu información personal y contraseña</p>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}"
+                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-6 flex items-center gap-2"
+                role="alert">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}"
+                class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6 flex items-center gap-2"
+                role="alert">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                <!-- Banner -->
+                <div class="bg-gradient-to-r from-green-500 to-green-600 h-24"></div>
+
+                <!-- Avatar & Basic Info -->
+                <div class="px-8 pb-8">
+                    <div class="flex items-end -mt-12 mb-6">
+                        <div
+                            class="w-24 h-24 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+                            <span class="text-4xl font-bold text-green-600"
+                                th:text="${#strings.substring(usuario.nombreCompleto, 0, 1)}">U</span>
+                        </div>
+                        <div class="ml-4 pb-2">
+                            <h2 class="text-2xl font-bold text-gray-800" th:text="${usuario.nombreCompleto}">Nombre</h2>
+                            <p class="text-gray-500">@<span th:text="${usuario.username}">username</span></p>
+                        </div>
+                    </div>
+
+                    <!-- User Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-xs text-gray-500 uppercase font-semibold mb-1">Email</div>
+                            <div class="text-gray-800 font-medium" th:text="${usuario.email}">email@example.com</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-xs text-gray-500 uppercase font-semibold mb-1">Rol</div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                                    th:classappend="${usuario.rol.nombre == 'ADMIN' ? 'bg-red-100 text-red-800' : 
+                                                       (usuario.rol.nombre == 'ENCARGADO' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800')}"
+                                    th:text="${usuario.rol.nombre}">Rol</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Form -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                    </svg>
+                    Editar Información
+                </h3>
+
+                <form th:action="@{/perfil/actualizar}" method="post">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="nombreCompleto">
+                                Nombre Completo
+                            </label>
+                            <input type="text" id="nombreCompleto" name="nombreCompleto"
+                                th:value="${usuario.nombreCompleto}"
+                                class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
+                                required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                                Email
+                            </label>
+                            <input type="email" id="email" name="email" th:value="${usuario.email}"
+                                class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
+                                required>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        Guardar Cambios
+                    </button>
+                </form>
+            </div>
+
+            <!-- Change Password Form -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
+                        </path>
+                    </svg>
+                    Cambiar Contraseña
+                </h3>
+
+                <form th:action="@{/perfil/cambiar-password}" method="post" id="passwordForm">
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="passwordActual">
+                                Contraseña Actual
+                            </label>
+                            <input type="password" id="passwordActual" name="passwordActual"
+                                class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="passwordNueva">
+                                Nueva Contraseña
+                                <span class="text-gray-400 font-normal text-xs">(mínimo 6 caracteres)</span>
+                            </label>
+                            <input type="password" id="passwordNueva" name="passwordNueva"
+                                class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                minlength="6" required oninput="checkPasswordMatch()">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="passwordConfirm">
+                                Confirmar Nueva Contraseña
+                            </label>
+                            <input type="password" id="passwordConfirm" name="passwordConfirm"
+                                class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                required oninput="checkPasswordMatch()">
+                            <p id="passwordMatchError" class="text-red-500 text-xs mt-1 hidden">
+                                Las contraseñas no coinciden
+                            </p>
+                            <p id="passwordMatchSuccess" class="text-green-500 text-xs mt-1 hidden">
+                                ✓ Las contraseñas coinciden
+                            </p>
+                        </div>
+                    </div>
+                    <button type="submit" id="submitPasswordBtn"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        Cambiar Contraseña
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkPasswordMatch() {
+            const password = document.getElementById('passwordNueva').value;
+            const confirm = document.getElementById('passwordConfirm').value;
+            const errorMsg = document.getElementById('passwordMatchError');
+            const successMsg = document.getElementById('passwordMatchSuccess');
+            const confirmInput = document.getElementById('passwordConfirm');
+
+            if (confirm.length === 0) {
+                errorMsg.classList.add('hidden');
+                successMsg.classList.add('hidden');
+                confirmInput.classList.remove('border-red-500', 'border-green-500');
+                return;
+            }
+
+            if (password !== confirm) {
+                errorMsg.classList.remove('hidden');
+                successMsg.classList.add('hidden');
+                confirmInput.classList.add('border-red-500');
+                confirmInput.classList.remove('border-green-500');
+            } else {
+                errorMsg.classList.add('hidden');
+                successMsg.classList.remove('hidden');
+                confirmInput.classList.add('border-green-500');
+                confirmInput.classList.remove('border-red-500');
+            }
+        }
+
+        document.getElementById('passwordForm').addEventListener('submit', function (e) {
+            const password = document.getElementById('passwordNueva').value;
+            const confirm = document.getElementById('passwordConfirm').value;
+
+            if (password !== confirm) {
+                e.preventDefault();
+                document.getElementById('passwordMatchError').classList.remove('hidden');
+                document.getElementById('passwordConfirm').focus();
+            }
+        });
+    </script>
+</body>
+
+</html>

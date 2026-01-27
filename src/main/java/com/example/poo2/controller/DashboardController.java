@@ -1,5 +1,6 @@
 package com.example.poo2.controller;
 
+import com.example.poo2.model.TareaRealizada;
 import com.example.poo2.service.ClienteService;
 import com.example.poo2.service.EmpleadoService;
 import com.example.poo2.service.TareaService;
@@ -7,6 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class DashboardController {
@@ -25,11 +31,12 @@ public class DashboardController {
         // Statistics
         long totalClientes = clienteService.findAll().size();
         long totalEmpleados = empleadoService.findAll().size();
-        long totalTareas = tareaService.findAllRealizadas().size();
+        var todasTareas = tareaService.findAllRealizadas();
+        long totalTareas = todasTareas.size();
         long totalTipos = tareaService.findAllTipos().size();
 
         // Calculate total earnings from activities
-        double totalGanancias = tareaService.findAllRealizadas().stream()
+        double totalGanancias = todasTareas.stream()
                 .mapToDouble(t -> t.getCantidad() * t.getPrecioAplicado())
                 .sum();
 
@@ -40,11 +47,62 @@ public class DashboardController {
         model.addAttribute("totalGanancias", totalGanancias);
 
         // Recent activities (last 5)
-        var todasTareas = tareaService.findAllRealizadas();
-        var tareasRecientes = todasTareas.size() > 5
-                ? todasTareas.subList(Math.max(todasTareas.size() - 5, 0), todasTareas.size())
-                : todasTareas;
+        var tareasRecientes = todasTareas.stream()
+                .sorted((a, b) -> b.getFecha().compareTo(a.getFecha()))
+                .limit(5)
+                .collect(Collectors.toList());
         model.addAttribute("tareasRecientes", tareasRecientes);
+
+        // === NUEVOS DATOS PARA DASHBOARD MEJORADO ===
+
+        // 1. Actividades del día (hoy)
+        LocalDate hoy = LocalDate.now();
+        var tareasHoy = todasTareas.stream()
+                .filter(t -> t.getFecha().equals(hoy))
+                .collect(Collectors.toList());
+        double totalHoy = tareasHoy.stream()
+                .mapToDouble(t -> t.getCantidad() * t.getPrecioAplicado())
+                .sum();
+        model.addAttribute("tareasHoy", tareasHoy);
+        model.addAttribute("totalHoy", totalHoy);
+
+        // 2. Top 5 empleados más productivos (por monto total)
+        Map<String, Double> empleadoTotales = new LinkedHashMap<>();
+        todasTareas.stream()
+                .collect(Collectors.groupingBy(
+                        t -> t.getEmpleado().getNombre(),
+                        Collectors.summingDouble(t -> t.getCantidad() * t.getPrecioAplicado())))
+                .entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .limit(5)
+                .forEach(e -> empleadoTotales.put(e.getKey(), e.getValue()));
+        model.addAttribute("topEmpleados", empleadoTotales);
+
+        // 3. Datos para gráfico de actividades por mes (últimos 6 meses)
+        List<String> mesesLabels = new ArrayList<>();
+        List<Double> mesesMontos = new ArrayList<>();
+        List<Long> mesesCantidades = new ArrayList<>();
+
+        YearMonth mesActual = YearMonth.now();
+        for (int i = 5; i >= 0; i--) {
+            YearMonth mes = mesActual.minusMonths(i);
+            String label = mes.getMonth().toString().substring(0, 3) + " " + mes.getYear();
+            mesesLabels.add(label);
+
+            double montoMes = todasTareas.stream()
+                    .filter(t -> YearMonth.from(t.getFecha()).equals(mes))
+                    .mapToDouble(t -> t.getCantidad() * t.getPrecioAplicado())
+                    .sum();
+            mesesMontos.add(montoMes);
+
+            long cantidadMes = todasTareas.stream()
+                    .filter(t -> YearMonth.from(t.getFecha()).equals(mes))
+                    .count();
+            mesesCantidades.add(cantidadMes);
+        }
+        model.addAttribute("mesesLabels", mesesLabels);
+        model.addAttribute("mesesMontos", mesesMontos);
+        model.addAttribute("mesesCantidades", mesesCantidades);
 
         return "home";
     }

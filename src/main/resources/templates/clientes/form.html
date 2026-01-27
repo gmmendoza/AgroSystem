@@ -7,64 +7,208 @@
 
 <body>
     <div layout:fragment="content">
-        <div class="max-w-lg mx-auto bg-white p-8 rounded shadow">
+        <div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
             <h2 class="text-2xl font-bold mb-6 text-gray-800"
                 th:text="${cliente.id == null ? 'Nuevo Cliente' : 'Editar Cliente'}">Nuevo Cliente</h2>
 
-            <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post">
+            <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post" id="clienteForm"
+                onsubmit="return validateForm()">
                 <input type="hidden" th:field="*{id}" />
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="nombre">Nombre</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="nombre">
+                        Nombre <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" th:field="*{nombre}" id="nombre"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
                         required>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="cuit">CUIT</label>
-                    <input type="text" th:field="*{cuit}" id="cuit"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        required>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="cuit">
+                        CUIT <span class="text-red-500">*</span>
+                        <span class="text-gray-400 font-normal text-xs">(Formato: XX-XXXXXXXX-X)</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" th:field="*{cuit}" id="cuit"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500 font-mono"
+                            placeholder="20-12345678-9" maxlength="13" required
+                            oninput="formatCuit(this); validateCuit()">
+                        <div id="cuitStatus" class="absolute right-3 top-2.5 hidden">
+                            <!-- Icono de validación -->
+                        </div>
+                    </div>
+                    <p id="cuitError" class="text-red-500 text-xs mt-1 hidden">
+                        El CUIT debe tener el formato XX-XXXXXXXX-X
+                    </p>
+                    <p id="cuitSuccess" class="text-green-500 text-xs mt-1 hidden">
+                        ✓ CUIT válido
+                    </p>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="condicionFiscal">Condición
-                        Fiscal</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="condicionFiscal">
+                        Condición Fiscal <span class="text-red-500">*</span>
+                    </label>
                     <select th:field="*{condicionFiscal}" id="condicionFiscal"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="Responsable Inscripto">Responsable Inscripto</option>
-                        <option value="Monotributista">Monotributista</option>
-                        <option value="Exento">Exento</option>
-                        <option value="Consumidor Final">Consumidor Final</option>
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
+                        required>
+                        <option value="">Seleccione...</option>
+                        <option th:each="condicion : ${condicionesFiscales}" th:value="${condicion}"
+                            th:text="${condicion.name().replace('_', ' ')}">
+                        </option>
                     </select>
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
                     <input type="email" th:field="*{email}" id="email"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
+                        placeholder="cliente@email.com">
                 </div>
 
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="direccion">Dirección</label>
                     <input type="text" th:field="*{direccion}" id="direccion"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
+                        placeholder="Calle 123, Ciudad">
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <button type="submit"
-                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    <button type="submit" id="submitBtn"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
                         Guardar
                     </button>
                     <a href="/clientes"
-                        class="inline-block align-baseline font-bold text-sm text-green-500 hover:text-green-800">
+                        class="inline-block align-baseline font-bold text-sm text-gray-500 hover:text-gray-800 transition-colors">
                         Cancelar
                     </a>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+        // Formatear CUIT automáticamente mientras escribe
+        function formatCuit(input) {
+            let value = input.value.replace(/\D/g, ''); // Solo números
+
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+
+            // Formato XX-XXXXXXXX-X
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '-' + value.substring(2);
+            }
+            if (value.length >= 11) {
+                value = value.substring(0, 11) + '-' + value.substring(11);
+            }
+
+            input.value = value;
+        }
+
+        // Validar CUIT con algoritmo de verificación
+        function validateCuit() {
+            const cuitInput = document.getElementById('cuit');
+            const errorMsg = document.getElementById('cuitError');
+            const successMsg = document.getElementById('cuitSuccess');
+            const cuitStatus = document.getElementById('cuitStatus');
+
+            const cuit = cuitInput.value;
+            const regex = /^\d{2}-\d{8}-\d{1}$/;
+
+            // Limpiar estados previos
+            cuitInput.classList.remove('border-red-500', 'border-green-500');
+            errorMsg.classList.add('hidden');
+            successMsg.classList.add('hidden');
+
+            if (cuit.length === 0) {
+                return true; // Aún no ingresó nada
+            }
+
+            if (!regex.test(cuit)) {
+                if (cuit.length >= 5) { // Mostrar error solo cuando tenga suficientes caracteres
+                    cuitInput.classList.add('border-red-500');
+                    errorMsg.classList.remove('hidden');
+                    cuitStatus.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                    cuitStatus.classList.remove('hidden');
+                }
+                return false;
+            }
+
+            // Validar dígito verificador
+            const cleanCuit = cuit.replace(/-/g, '');
+            if (isValidCuitChecksum(cleanCuit)) {
+                cuitInput.classList.add('border-green-500');
+                successMsg.classList.remove('hidden');
+                cuitStatus.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                cuitStatus.classList.remove('hidden');
+                return true;
+            } else {
+                cuitInput.classList.add('border-red-500');
+                errorMsg.textContent = 'El dígito verificador del CUIT es inválido';
+                errorMsg.classList.remove('hidden');
+                cuitStatus.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                cuitStatus.classList.remove('hidden');
+                return false;
+            }
+        }
+
+        // Algoritmo de verificación CUIT argentino
+        function isValidCuitChecksum(cuit) {
+            if (cuit.length !== 11) return false;
+
+            const mult = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+            let sum = 0;
+
+            for (let i = 0; i < 10; i++) {
+                sum += parseInt(cuit[i]) * mult[i];
+            }
+
+            let remainder = sum % 11;
+            let checkDigit = 11 - remainder;
+
+            if (checkDigit === 11) checkDigit = 0;
+            if (checkDigit === 10) checkDigit = 9;
+
+            return checkDigit === parseInt(cuit[10]);
+        }
+
+        // Validar formulario antes de enviar
+        function validateForm() {
+            const cuit = document.getElementById('cuit').value;
+            const regex = /^\d{2}-\d{8}-\d{1}$/;
+
+            if (!regex.test(cuit)) {
+                document.getElementById('cuitError').classList.remove('hidden');
+                document.getElementById('cuit').focus();
+                return false;
+            }
+
+            const cleanCuit = cuit.replace(/-/g, '');
+            if (!isValidCuitChecksum(cleanCuit)) {
+                document.getElementById('cuitError').textContent = 'El dígito verificador del CUIT es inválido';
+                document.getElementById('cuitError').classList.remove('hidden');
+                document.getElementById('cuit').focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        // Validar al cargar si hay valor existente
+        document.addEventListener('DOMContentLoaded', function () {
+            const cuitInput = document.getElementById('cuit');
+            if (cuitInput.value) {
+                validateCuit();
+            }
+        });
+    </script>
 </body>
 
 </html>

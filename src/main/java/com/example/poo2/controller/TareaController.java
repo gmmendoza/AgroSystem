@@ -69,7 +69,6 @@ public class TareaController {
     @PostMapping("/registro/guardar")
     public String saveRegistro(@ModelAttribute TareaRealizada tareaRealizada, RedirectAttributes redirectAttributes) {
         try {
-            // Ensure date is set if not provided (though form should provide it)
             if (tareaRealizada.getFecha() == null) {
                 tareaRealizada.setFecha(LocalDate.now());
             }
@@ -85,5 +84,43 @@ public class TareaController {
     public String listHistorial(Model model) {
         model.addAttribute("tareas", tareaService.findAllRealizadas());
         return "tareas/historial";
+    }
+
+    // --- Editar Actividad ---
+
+    @GetMapping("/editar/{id}")
+    public String editarActividad(@PathVariable Long id, Model model) {
+        tareaService.findRealizadaById(id).ifPresent(tarea -> {
+            model.addAttribute("tareaRealizada", tarea);
+        });
+        model.addAttribute("empleados", empleadoService.findAll());
+        model.addAttribute("tipos", tareaService.findAllTipos());
+        model.addAttribute("editando", true);
+        return "tareas/registro";
+    }
+
+    @PostMapping("/actualizar")
+    public String actualizarActividad(@ModelAttribute TareaRealizada tareaRealizada,
+            RedirectAttributes redirectAttributes) {
+        try {
+            tareaService.actualizarTarea(tareaRealizada);
+            redirectAttributes.addFlashAttribute("success", "Actividad actualizada correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar: " + e.getMessage());
+        }
+        return "redirect:/tareas/historial";
+    }
+
+    // --- Eliminar Actividad ---
+
+    @GetMapping("/eliminar/{id}")
+    public String eliminarActividad(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            tareaService.eliminarTarea(id);
+            redirectAttributes.addFlashAttribute("success", "Actividad eliminada correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar: " + e.getMessage());
+        }
+        return "redirect:/tareas/historial";
     }
 }

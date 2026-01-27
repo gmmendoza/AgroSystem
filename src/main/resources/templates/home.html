@@ -85,6 +85,99 @@
             </div>
         </div>
 
+        <!-- Actividades del Día - Destacado -->
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 mb-8 text-white">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold mb-1">📅 Actividades de Hoy</h2>
+                    <p class="text-green-100">Resumen del día actual</p>
+                </div>
+                <div class="flex gap-8">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold" th:text="${#lists.size(tareasHoy)}">0</div>
+                        <div class="text-green-100 text-sm">Actividades</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold"
+                            th:text="${'$' + #numbers.formatDecimal(totalHoy, 0, 'COMMA', 0, 'POINT')}">$0</div>
+                        <div class="text-green-100 text-sm">Total del día</div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${!#lists.isEmpty(tareasHoy)}"
+                class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div th:each="tarea : ${tareasHoy}" class="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
+                    <div class="font-semibold" th:text="${tarea.empleado.nombre}">Empleado</div>
+                    <div class="text-sm text-green-100"
+                        th:text="${tarea.tipoTarea.descripcion + ' - ' + tarea.cantidad + ' ' + tarea.tipoTarea.unidadMedida}">
+                        Tarea</div>
+                </div>
+            </div>
+            <div th:if="${#lists.isEmpty(tareasHoy)}" class="mt-4 text-center text-green-100">
+                <p>No hay actividades registradas hoy. <a href="/tareas/registro"
+                        class="underline font-semibold">¿Registrar una?</a></p>
+            </div>
+        </div>
+
+        <!-- Charts & Top Empleados -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Chart - Actividades por Mes -->
+            <div class="lg:col-span-2 card">
+                <div class="card-header">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        <span>Actividades por Mes</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <canvas id="actividadesChart" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Top 5 Empleados -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
+                            </path>
+                        </svg>
+                        <span>Top 5 Empleados</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div th:if="${#maps.isEmpty(topEmpleados)}" class="text-center py-8 text-gray-500">
+                        <p>No hay datos aún</p>
+                    </div>
+                    <div th:if="${!#maps.isEmpty(topEmpleados)}" class="space-y-4">
+                        <div th:each="entry, stat : ${topEmpleados}" class="flex items-center gap-3">
+                            <div th:class="${stat.index == 0 ? 'bg-yellow-400 text-white' : (stat.index == 1 ? 'bg-gray-300 text-gray-700' : (stat.index == 2 ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-600'))}"
+                                class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                                <span th:text="${stat.index + 1}">1</span>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="font-semibold text-gray-800" th:text="${entry.key}">Empleado</div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full transition-all duration-500"
+                                        th:style="'width: ' + ${(entry.value / topEmpleados.values().iterator().next()) * 100} + '%'">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-bold text-green-600"
+                                    th:text="${'$' + #numbers.formatDecimal(entry.value, 0, 'COMMA', 0, 'POINT')}">$0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Quick Actions & Recent Activities -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <!-- Quick Actions -->
@@ -121,7 +214,6 @@
                             </svg>
                         </div>
                     </a>
-
                     <a href="/empleados/nuevo"
                         class="block p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition-all duration-300 group">
                         <div class="flex items-center justify-between">
@@ -144,7 +236,6 @@
                             </svg>
                         </div>
                     </a>
-
                     <a href="/tareas/registro"
                         class="block p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all duration-300 group">
                         <div class="flex items-center justify-between">
@@ -184,7 +275,7 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <div th:if="${tareasRecientes.isEmpty()}" class="text-center py-8 text-gray-500">
+                    <div th:if="${#lists.isEmpty(tareasRecientes)}" class="text-center py-8 text-gray-500">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -193,7 +284,7 @@
                         </svg>
                         <p>No hay actividades registradas aún</p>
                     </div>
-                    <div class="space-y-3" th:if="${!tareasRecientes.isEmpty()}">
+                    <div class="space-y-3" th:if="${!#lists.isEmpty(tareasRecientes)}">
                         <div th:each="tarea : ${tareasRecientes}"
                             class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                             <div class="flex items-center space-x-3">
@@ -240,7 +331,6 @@
                     <p class="text-gray-600">Gestionar clientes y cuentas</p>
                 </div>
             </a>
-
             <a href="/empleados" class="card group hover:shadow-2xl">
                 <div class="p-8 text-center">
                     <div
@@ -255,7 +345,6 @@
                     <p class="text-gray-600">Gestionar personal y legajos</p>
                 </div>
             </a>
-
             <a href="/tareas/tipos" class="card group hover:shadow-2xl">
                 <div class="p-8 text-center">
                     <div
@@ -274,6 +363,108 @@
             </a>
         </div>
     </div>
+
+    <!-- Chart.js Script -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const mesesLabels = /*[[${mesesLabels}]]*/[];
+            const mesesMontos = /*[[${mesesMontos}]]*/[];
+            const mesesCantidades = /*[[${mesesCantidades}]]*/[];
+
+            const ctx = document.getElementById('actividadesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: mesesLabels,
+                    datasets: [{
+                        label: 'Monto ($)',
+                        data: mesesMontos,
+                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Actividades',
+                        data: mesesCantidades,
+                        type: 'line',
+                        borderColor: 'rgba(147, 51, 234, 1)',
+                        backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(147, 51, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            callbacks: {
+                                label: function (context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'Monto: $' + context.raw.toLocaleString('es-AR');
+                                    }
+                                    return 'Actividades: ' + context.raw;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    return '$' + value.toLocaleString('es-AR');
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

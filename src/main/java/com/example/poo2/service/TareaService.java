@@ -55,7 +55,8 @@ public class TareaService {
         if (precio.isPresent()) {
             tarea.setPrecioAplicado(precio.get());
         } else {
-            throw new RuntimeException("No hay precio vigente para la tarea " + tarea.getTipoTarea().getDescripcion() + " en la fecha " + tarea.getFecha());
+            throw new RuntimeException("No hay precio vigente para la tarea " + tarea.getTipoTarea().getDescripcion()
+                    + " en la fecha " + tarea.getFecha());
         }
         return tareaRealizadaRepository.save(tarea);
     }
@@ -63,8 +64,30 @@ public class TareaService {
     public List<TareaRealizada> findAllRealizadas() {
         return tareaRealizadaRepository.findAll();
     }
-    
+
     public List<TareaRealizada> findRealizadasByEmpleado(Long empleadoId) {
         return tareaRealizadaRepository.findByEmpleadoId(empleadoId);
+    }
+
+    // --- Nuevos métodos para editar/eliminar ---
+
+    public Optional<TareaRealizada> findRealizadaById(Long id) {
+        return tareaRealizadaRepository.findById(id);
+    }
+
+    public TareaRealizada actualizarTarea(TareaRealizada tarea) {
+        // Recalcular precio si cambió la fecha o el tipo
+        Optional<Double> precio = findPrecioVigente(tarea.getTipoTarea(), tarea.getFecha());
+        if (precio.isPresent()) {
+            tarea.setPrecioAplicado(precio.get());
+        } else {
+            throw new RuntimeException("No hay precio vigente para la tarea " + tarea.getTipoTarea().getDescripcion()
+                    + " en la fecha " + tarea.getFecha());
+        }
+        return tareaRealizadaRepository.save(tarea);
+    }
+
+    public void eliminarTarea(Long id) {
+        tareaRealizadaRepository.deleteById(id);
     }
 }

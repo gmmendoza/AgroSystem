@@ -1,6 +1,7 @@
 package com.example.poo2.controller;
 
 import com.example.poo2.model.Cliente;
+import com.example.poo2.model.CondicionFiscal;
 import com.example.poo2.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,7 @@ public class ClienteController {
     @GetMapping("/nuevo")
     public String form(Model model) {
         model.addAttribute("cliente", new Cliente());
+        model.addAttribute("condicionesFiscales", CondicionFiscal.values());
         return "clientes/form";
     }
 
@@ -35,6 +37,7 @@ public class ClienteController {
     @GetMapping("/editar/{id}")
     public String edit(@PathVariable Long id, Model model) {
         clienteService.findById(id).ifPresent(cliente -> model.addAttribute("cliente", cliente));
+        model.addAttribute("condicionesFiscales", CondicionFiscal.values());
         return "clientes/form";
     }
 
