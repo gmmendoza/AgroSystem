@@ -1,6 +1,6 @@
 # Retrospectiva Iteración 1
 
-## Lo que hicimos bien
+## Lo que hice bien
 
 - **Arquitectura sólida desde el inicio**: Se definió una arquitectura MVC clara con Spring Boot, separando correctamente las capas de modelo, repositorio, servicio y controlador.
 - **Seguridad implementada**: Se integró Spring Security con autenticación real desde el principio, evitando tener que refactorizar después.
@@ -8,7 +8,7 @@
 - **Documentación siguiendo estándares**: Se adoptó un formato de documentación profesional con wireframes, diagramas UML y casos de uso detallados.
 - **UI moderna y responsiva**: Se utilizó Tailwind CSS con diseño glassmorphism y animaciones para una experiencia de usuario premium.
 
-## Lo que nos costó
+## Lo que me costó
 
 - **Configuración inicial de Docker**: La configuración del contenedor con PostgreSQL y la aplicación Spring Boot requirió varios ajustes en las variables de entorno.
 - **Integración de Spring Security**: Configurar correctamente el login form con Thymeleaf y los redirects tomó más tiempo del esperado.

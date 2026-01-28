@@ -1,16 +1,16 @@
 # Roadmap del Proyecto - AgroSystem
 
-## Iteracion 1 (Actual - Completada)
+## Iteración 1 (Actual - Completada)
 
 ### Funcionalidades Implementadas
-- Autenticacion de usuarios (login/logout/registro)
-- Gestion de Clientes (ABM)
-- Gestion de Empleados (ABM)
-- Configuracion de Tipos de Tarea
-- Gestion de Precios Historicos
+- Autenticación de usuarios (login/logout/registro)
+- Gestión de Clientes (ABM)
+- Gestión de Empleados (ABM)
+- Configuración de Tipos de Tarea
+- Gestión de Precios Históricos
 - Registro de Actividades de Campo
-- Dashboard con estadisticas
-- Pagina de documentacion integrada
+- Dashboard con estadísticas
+- Página de documentación integrada
 
 ### Modelo de Datos
 - 11 entidades implementadas
@@ -18,74 +18,58 @@
 
 ---
 
-## Iteracion 2 (Planificada)
+## Iteración 2 (Planificada)
 
 ### Funcionalidades a Implementar
 
-#### Facturacion
-- Generar facturas individuales
-- Facturacion masiva por periodo
-- Calculo automatico de IVA segun condicion fiscal
-- Notas de credito para anulaciones
+#### Liquidación de Empleados
+- Generación de liquidaciones por periodo
+- Cálculo de totales a pagar por empleado
+- Estados de liquidación (Pendiente, Aprobada, Pagada)
+- Visualización de detalle de liquidación
 
-#### Pagos
-- Registro de pagos recibidos
-- Metodos de pago (Efectivo, Transferencia, Cheque)
-- Estado de facturas (Pendiente, Pagada, Anulada)
+#### Cuentas Corrientes de Clientes
+- Registro de saldos por cliente
+- Historial de movimientos
+- Límites de crédito
+- Vista de estado de cuenta
 
-#### Liquidacion de Empleados
-- Generacion de liquidaciones por periodo
-- Calculo de totales a pagar
-- Estados de liquidacion (Pendiente, Aprobada, Pagada)
+#### Gestión de Almacenes
+- Control de almacenes/depósitos
+- Registro de ubicación y capacidad
+- Estado activo/inactivo
 
-### Nuevas Entidades
-- Factura
-- DetalleFactura
-- Pago
-- NotaCredito
-
----
-
-## Iteracion 3 (Futuro)
-
-### Funcionalidades Planificadas
-
-#### Reportes Avanzados
+#### Reportes
 - Reporte de productividad por empleado
-- Reporte de facturacion mensual
-- Reporte de cuentas por cobrar
-- Exportacion a PDF y Excel
+- Reporte de actividades por periodo
+- Reporte de cuentas corrientes
+- Exportación a PDF
 
-#### Gestion de Almacenes
-- Control de stock por almacen
-- Movimientos entre almacenes
-- Inventario valorizado
-
-#### Integraciones
-- Integracion con AFIP para facturacion electronica
-- Notificaciones por email
-- API REST para integraciones externas
+### Entidades a Activar
+- Liquidación (ya existe)
+- CuentaCorriente (ya existe)
+- Almacén (ya existe)
 
 ---
 
-## Mejoras Tecnicas Pendientes
+## Mejoras Técnicas Pendientes
 
 ### Testing
 - [ ] Tests unitarios para servicios
-- [ ] Tests de integracion para controladores
+- [ ] Tests de integración para controladores
 - [ ] Tests end-to-end con Selenium
 
 ### Seguridad
-- [ ] Habilitar CSRF en produccion
+- [ ] Habilitar CSRF en producción
 - [ ] Implementar rate limiting
-- [ ] Auditoria de acciones de usuario
+- [ ] Auditoría de acciones de usuario
 
 ### Infraestructura
-- [ ] Configuracion de CI/CD
+- [ ] Configuración de CI/CD
 - [ ] Despliegue en cloud (AWS/Azure/GCP)
-- [ ] Backup automatico de base de datos
+- [ ] Backup automático de base de datos
 
 ---
 
-**Ultima actualizacion:** Enero 2026  
+**Última actualización:** Enero 2026  
 **Desarrollado por:** Guadalupe Mendoza
