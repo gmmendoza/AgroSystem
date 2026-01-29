@@ -3,6 +3,7 @@ package com.example.poo2.controller;
 import com.example.poo2.model.Cliente;
 import com.example.poo2.model.CondicionFiscal;
 import com.example.poo2.service.ClienteService;
+import com.example.poo2.repository.CondicionFiscalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,9 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
+    @Autowired
+    private CondicionFiscalRepository condicionFiscalRepository;
+
     @GetMapping
     public String list(Model model) {
         model.addAttribute("clientes", clienteService.findAll());
@@ -24,7 +28,7 @@ public class ClienteController {
     @GetMapping("/nuevo")
     public String form(Model model) {
         model.addAttribute("cliente", new Cliente());
-        model.addAttribute("condicionesFiscales", CondicionFiscal.values());
+        model.addAttribute("condicionesFiscales", condicionFiscalRepository.findAll());
         return "clientes/form";
     }
 
@@ -33,7 +37,7 @@ public class ClienteController {
             org.springframework.validation.BindingResult result, Model model,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            model.addAttribute("condicionesFiscales", CondicionFiscal.values());
+            model.addAttribute("condicionesFiscales", condicionFiscalRepository.findAll());
             return "clientes/form";
         }
         clienteService.save(cliente);
@@ -44,7 +48,7 @@ public class ClienteController {
     @GetMapping("/editar/{id}")
     public String edit(@PathVariable Long id, Model model) {
         clienteService.findById(id).ifPresent(cliente -> model.addAttribute("cliente", cliente));
-        model.addAttribute("condicionesFiscales", CondicionFiscal.values());
+        model.addAttribute("condicionesFiscales", condicionFiscalRepository.findAll());
         return "clientes/form";
     }
 

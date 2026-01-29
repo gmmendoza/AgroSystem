@@ -13,9 +13,13 @@ import java.util.Optional;
 
 @Repository
 public interface PrecioTareaRepository extends JpaRepository<PrecioTarea, Long> {
-    
+
     List<PrecioTarea> findByTipoTarea(TipoTarea tipoTarea);
 
-    @Query("SELECT p FROM PrecioTarea p WHERE p.tipoTarea = :tipoTarea AND p.fechaVigencia <= :fecha ORDER BY p.fechaVigencia DESC LIMIT 1")
-    Optional<PrecioTarea> findPrecioVigente(@Param("tipoTarea") TipoTarea tipoTarea, @Param("fecha") LocalDate fecha);
+    Optional<PrecioTarea> findTopByTipoTareaAndFechaVigenciaLessThanEqualOrderByFechaVigenciaDesc(TipoTarea tipoTarea,
+            LocalDate fecha);
+
+    default Optional<PrecioTarea> findPrecioVigente(TipoTarea tipoTarea, LocalDate fecha) {
+        return findTopByTipoTareaAndFechaVigenciaLessThanEqualOrderByFechaVigenciaDesc(tipoTarea, fecha);
+    }
 }

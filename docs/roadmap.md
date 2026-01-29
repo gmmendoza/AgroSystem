@@ -9,11 +9,11 @@
 - Configuración de Tipos de Tarea
 - Gestión de Precios Históricos
 - Registro de Actividades de Campo
-- Dashboard con estadísticas
+- Inicio con estadísticas
 - Página de documentación integrada
 
 ### Modelo de Datos
-- 11 entidades implementadas
+- 13 entidades implementadas
 - Sistema de roles (ADMIN, ENCARGADO, OPERADOR)
 
 ---
@@ -57,17 +57,6 @@
 ### Testing
 - [ ] Tests unitarios para servicios
 - [ ] Tests de integración para controladores
-- [ ] Tests end-to-end con Selenium
-
-### Seguridad
-- [ ] Habilitar CSRF en producción
-- [ ] Implementar rate limiting
-- [ ] Auditoría de acciones de usuario
-
-### Infraestructura
-- [ ] Configuración de CI/CD
-- [ ] Despliegue en cloud (AWS/Azure/GCP)
-- [ ] Backup automático de base de datos
 
 ---
 

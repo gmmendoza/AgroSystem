@@ -32,9 +32,9 @@ public class Liquidacion {
     @Column(nullable = false)
     private Double totalNeto = 0.0;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EstadoLiquidacion estado = EstadoLiquidacion.PENDIENTE;
+    @ManyToOne
+    @JoinColumn(name = "estado_id", nullable = false)
+    private EstadoLiquidacion estado;
 
     private LocalDate fechaPago;
 
@@ -47,8 +47,8 @@ public class Liquidacion {
         this.empleado = empleado;
         this.periodoInicio = periodoInicio;
         this.periodoFin = periodoFin;
+        this.periodoFin = periodoFin;
         this.fechaGeneracion = LocalDate.now();
-        this.estado = EstadoLiquidacion.PENDIENTE;
     }
 
     // Getters y Setters

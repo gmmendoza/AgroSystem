@@ -1,5 +1,6 @@
 package com.example.poo2.controller;
 
+import com.example.poo2.model.Empleado;
 import com.example.poo2.model.PrecioTarea;
 import com.example.poo2.model.TareaRealizada;
 import com.example.poo2.model.TipoTarea;
@@ -12,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/tareas")
@@ -23,19 +28,23 @@ public class TareaController {
     @Autowired
     private EmpleadoService empleadoService;
 
+    @Autowired
+    private com.example.poo2.repository.UnidadMedidaRepository unidadMedidaRepository;
+
     // --- Tipos de Tarea ---
 
     @GetMapping("/tipos")
     public String listTipos(Model model) {
         model.addAttribute("tipos", tareaService.findAllTipos());
         model.addAttribute("tipoTarea", new TipoTarea());
+        model.addAttribute("unidadesMedida", unidadMedidaRepository.findAll());
         return "tareas/tipos";
     }
 
     @PostMapping("/tipos/guardar")
     public String saveTipo(@ModelAttribute TipoTarea tipoTarea) {
         tareaService.saveTipo(tipoTarea);
-        return "redirect:/tareas/tipos";
+        return "redirect:/actividades?tab=config";
     }
 
     // --- Precios ---
@@ -53,7 +62,7 @@ public class TareaController {
     @PostMapping("/precios/guardar")
     public String savePrecio(@ModelAttribute PrecioTarea precioTarea) {
         tareaService.savePrecio(precioTarea);
-        return "redirect:/tareas/precios";
+        return "redirect:/actividades?tab=config";
     }
 
     // --- Registro de Actividad ---
@@ -67,17 +76,37 @@ public class TareaController {
     }
 
     @PostMapping("/registro/guardar")
-    public String saveRegistro(@ModelAttribute TareaRealizada tareaRealizada, RedirectAttributes redirectAttributes) {
+    public String saveRegistro(@ModelAttribute TareaRealizada tareaRealizada,
+            @RequestParam(value = "empleadoIds", required = false) List<Long> empleadoIds,
+            RedirectAttributes redirectAttributes) {
         try {
             if (tareaRealizada.getFecha() == null) {
                 tareaRealizada.setFecha(LocalDate.now());
             }
-            tareaService.registrarTarea(tareaRealizada);
-            redirectAttributes.addFlashAttribute("success", "Actividad registrada correctamente.");
+
+            if (empleadoIds != null && !empleadoIds.isEmpty()) {
+                for (Long empId : empleadoIds) {
+                    TareaRealizada t = new TareaRealizada();
+                    t.setFecha(tareaRealizada.getFecha());
+                    t.setTipoTarea(tareaRealizada.getTipoTarea());
+                    t.setCantidad(tareaRealizada.getCantidad());
+
+                    Empleado e = new Empleado();
+                    e.setId(empId);
+                    t.setEmpleado(e);
+
+                    tareaService.registrarTarea(t);
+                }
+                redirectAttributes.addFlashAttribute("success",
+                        "Actividad registrada para " + empleadoIds.size() + " empleados.");
+            } else {
+                tareaService.registrarTarea(tareaRealizada);
+                redirectAttributes.addFlashAttribute("success", "Actividad registrada correctamente.");
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al registrar: " + e.getMessage());
         }
-        return "redirect:/tareas/registro";
+        return "redirect:/actividades";
     }
 
     @GetMapping("/historial")
@@ -135,6 +164,50 @@ public class TareaController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al eliminar: " + e.getMessage());
         }
-        return "redirect:/tareas/historial";
+        return "redirect:/actividades";
+    }
+
+    // --- API for Frontend ---
+
+    @GetMapping("/api/precios/{id}")
+    @ResponseBody
+    public List<Map<String, Object>> getPreciosPorTipo(@PathVariable Long id) {
+        TipoTarea tipo = new TipoTarea();
+        tipo.setId(id);
+        return tareaService.findPreciosByTipo(tipo).stream()
+                .map(p -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("fecha", p.getFechaVigencia());
+                    map.put("valor", p.getValor());
+                    return map;
+                })
+                .sorted((a, b) -> ((LocalDate) a.get("fecha"))
+                        .compareTo((LocalDate) b.get("fecha")))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/api/check-precio")
+    @ResponseBody
+    public Map<String, Object> checkPrecio(@RequestParam Long tipoId, @RequestParam String fecha) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            TipoTarea tipo = new TipoTarea();
+            tipo.setId(tipoId);
+            LocalDate fechaDate = LocalDate.parse(fecha);
+
+            java.util.Optional<Double> precio = tareaService.findPrecioVigente(tipo, fechaDate);
+
+            if (precio.isPresent()) {
+                response.put("valid", true);
+                response.put("precio", precio.get());
+            } else {
+                response.put("valid", false);
+                response.put("message", "No hay precio vigente para esta fecha.");
+            }
+        } catch (Exception e) {
+            response.put("valid", false);
+            response.put("message", "Error al validar precio: " + e.getMessage());
+        }
+        return response;
     }
 }

@@ -16,6 +16,14 @@ import java.util.Random;
 public class DataSeeder implements CommandLineRunner {
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private CondicionFiscalRepository condicionFiscalRepository;
+    @Autowired
+    private UnidadMedidaRepository unidadMedidaRepository;
+    @Autowired
+    private EstadoLiquidacionRepository estadoLiquidacionRepository;
+    @Autowired
     private UsuarioRepository usuarioRepository;
     @Autowired
     private RolRepository rolRepository;
@@ -27,18 +35,49 @@ public class DataSeeder implements CommandLineRunner {
     private TipoTareaRepository tipoTareaRepository;
     @Autowired
     private TareaRealizadaRepository tareaRealizadaRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     private final Random random = new Random();
 
     @Override
     public void run(String... args) throws Exception {
+        seedCondicionesFiscales();
+        seedUnidadesMedida();
+        seedEstadosLiquidacion();
         seedRolesAndUsers();
         seedClientes();
         seedEmpleados();
         seedTiposTarea();
         seedTareas();
+    }
+
+    private void seedCondicionesFiscales() {
+        if (condicionFiscalRepository.count() == 0) {
+            condicionFiscalRepository.saveAll(Arrays.asList(
+                    new CondicionFiscal("RESPONSABLE_INSCRIPTO", "Responsable Inscripto"),
+                    new CondicionFiscal("MONOTRIBUTISTA", "Monotributista"),
+                    new CondicionFiscal("EXENTO", "Exento"),
+                    new CondicionFiscal("CONSUMIDOR_FINAL", "Consumidor Final")));
+        }
+    }
+
+    private void seedUnidadesMedida() {
+        if (unidadMedidaRepository.count() == 0) {
+            unidadMedidaRepository.saveAll(Arrays.asList(
+                    new UnidadMedida("KILO"),
+                    new UnidadMedida("HECTAREA"),
+                    new UnidadMedida("DIA"),
+                    new UnidadMedida("HORA")));
+        }
+    }
+
+    private void seedEstadosLiquidacion() {
+        if (estadoLiquidacionRepository.count() == 0) {
+            estadoLiquidacionRepository.saveAll(Arrays.asList(
+                    new EstadoLiquidacion("PENDIENTE"),
+                    new EstadoLiquidacion("APROBADA"),
+                    new EstadoLiquidacion("PAGADA"),
+                    new EstadoLiquidacion("ANULADA")));
+        }
     }
 
     private void seedRolesAndUsers() {
@@ -60,12 +99,13 @@ public class DataSeeder implements CommandLineRunner {
         if (clienteRepository.count() == 0) {
             String[] nombres = { "Agro", "Campo", "Finca", "Estancia", "Granja", "Cooperativa" };
             String[] apellidos = { "Sur", "Norte", "Verde", "Azul", "Dorada", "Fértil", "Nueva", "Vieja" };
+            List<CondicionFiscal> condiciones = condicionFiscalRepository.findAll();
 
             for (int i = 0; i < 20; i++) {
                 String nombre = nombres[random.nextInt(nombres.length)] + " "
                         + apellidos[random.nextInt(apellidos.length)] + " S.A.";
                 String cuit = "30-" + (10000000 + random.nextInt(90000000)) + "-" + random.nextInt(10);
-                CondicionFiscal condicion = CondicionFiscal.values()[random.nextInt(CondicionFiscal.values().length)];
+                CondicionFiscal condicion = condiciones.get(random.nextInt(condiciones.size()));
                 String email = "contacto" + i + "@" + nombre.toLowerCase().replaceAll(" ", "").replaceAll("\\.", "")
                         + ".com";
 
@@ -100,11 +140,16 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedTiposTarea() {
         if (tipoTareaRepository.count() == 0) {
-            tipoTareaRepository.save(new TipoTarea("Cosecha Manual", UnidadMedida.KILO));
-            tipoTareaRepository.save(new TipoTarea("Siembra", UnidadMedida.HECTAREA));
-            tipoTareaRepository.save(new TipoTarea("Fumigación", UnidadMedida.HECTAREA));
-            tipoTareaRepository.save(new TipoTarea("Poda", UnidadMedida.DIA));
-            tipoTareaRepository.save(new TipoTarea("Mantenimiento Maquinaria", UnidadMedida.HORA));
+            UnidadMedida kilo = unidadMedidaRepository.findByNombre("KILO").orElse(null);
+            UnidadMedida hectarea = unidadMedidaRepository.findByNombre("HECTAREA").orElse(null);
+            UnidadMedida dia = unidadMedidaRepository.findByNombre("DIA").orElse(null);
+            UnidadMedida hora = unidadMedidaRepository.findByNombre("HORA").orElse(null);
+
+            tipoTareaRepository.save(new TipoTarea("Cosecha Manual", kilo));
+            tipoTareaRepository.save(new TipoTarea("Siembra", hectarea));
+            tipoTareaRepository.save(new TipoTarea("Fumigación", hectarea));
+            tipoTareaRepository.save(new TipoTarea("Poda", dia));
+            tipoTareaRepository.save(new TipoTarea("Mantenimiento Maquinaria", hora));
             System.out.println("Tipos de Tarea creados.");
         }
     }

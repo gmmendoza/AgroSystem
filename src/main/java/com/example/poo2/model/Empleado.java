@@ -30,6 +30,10 @@ public class Empleado {
     /** Puesto o cargo del empleado en la empresa */
     private String puesto;
 
+    @OneToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
     // Constructores
 
     public Empleado() {
@@ -73,5 +77,13 @@ public class Empleado {
 
     public void setPuesto(String puesto) {
         this.puesto = puesto;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }

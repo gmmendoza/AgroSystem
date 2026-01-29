@@ -38,9 +38,13 @@ public class Cliente {
 
     /** Condicion fiscal del cliente para calculo de IVA */
     @NotNull(message = "La condición fiscal es obligatoria")
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "condicion_fiscal_id", nullable = false)
     private CondicionFiscal condicionFiscal;
+
+    @ManyToOne
+    @JoinColumn(name = "agente_comercial_id")
+    private Usuario agenteComercial;
 
     /** Direccion del cliente */
     private String direccion;
@@ -110,5 +114,13 @@ public class Cliente {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Usuario getAgenteComercial() {
+        return agenteComercial;
+    }
+
+    public void setAgenteComercial(Usuario agenteComercial) {
+        this.agenteComercial = agenteComercial;
     }
 }

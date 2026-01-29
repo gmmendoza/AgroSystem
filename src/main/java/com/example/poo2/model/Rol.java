@@ -15,6 +15,10 @@ public class Rol {
 
     private String descripcion;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_rol_id")
+    private Rol parentRol;
+
     public Rol() {
     }
 
@@ -45,5 +49,13 @@ public class Rol {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public Rol getParentRol() {
+        return parentRol;
+    }
+
+    public void setParentRol(Rol parentRol) {
+        this.parentRol = parentRol;
     }
 }

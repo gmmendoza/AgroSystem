@@ -20,7 +20,7 @@
 - **Página de Login**  
   ![Login](wireframes/login.png)
 
-- **Dashboard Principal**  
+- **Inicio Principal**  
   ![Dashboard](wireframes/dashboard.png)
 
 - **Gestión de Clientes**  
@@ -43,7 +43,7 @@
 **Actores:** Usuario (Administrador, Encargado, Operador)  
 **Propósito:** Permite a los usuarios autenticarse en el sistema para acceder a las funcionalidades según su rol.  
 **Precondición:** El usuario tiene una cuenta activa en el sistema.  
-**Postcondición:** El usuario accede al dashboard y puede navegar según sus permisos.
+**Postcondición:** El usuario accede al inicio y puede navegar según sus permisos.
 
 #### Caso de Uso 2: Gestionar Clientes (ABM)
 **Actores:** Administrador  
@@ -81,7 +81,7 @@
 **Precondición:** El usuario ha iniciado sesión.  
 **Postcondición:** Se muestra el listado de actividades con empleado, tarea, cantidad y monto.
 
-#### Caso de Uso 8: Ver Dashboard con Estadísticas
+#### Caso de Uso 8: Ver Inicio con Estadísticas
 **Actores:** Administrador, Encargado  
 **Propósito:** Visualizar estadísticas en tiempo real del negocio.  
 **Precondición:** El usuario ha iniciado sesión.  
@@ -169,10 +169,10 @@ Para llevar control de la producción y calcular pagos.
 - Ingreso de fecha (permite retroactiva) y cantidad.
 - El sistema calcula automáticamente el subtotal con el precio vigente.
 
-#### **HU7: Dashboard con Estadísticas**
+#### **HU7: Inicio con Estadísticas**
 **Descripción de la historia de usuario**  
 Como usuario,  
-Quiero ver un resumen de la operación en el dashboard  
+Quiero ver un resumen de la operación en el inicio  
 Para tener una visión general del negocio.
 
 **Criterios de aceptación**  
@@ -203,4 +203,4 @@ Para tener una visión general del negocio.
 - [x] Crear vistas de listado y formulario de Empleados
 - [x] Crear vista de configuración de Tareas y Precios
 - [x] Crear vista de Registro de Actividades
-- [x] Crear Dashboard con estadísticas y accesos rápidos
+- [x] Crear Inicio con estadísticas y accesos rápidos

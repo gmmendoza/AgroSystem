@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="modal" x-data="registroWizard()" @open-registro-modal.window="openModal()"
+        @price-updated.window="markPriceAsActive($event.detail.tipoId)" class="relative z-10"
+        aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;" x-show="isOpen" x-cloak>
+
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" x-show="isOpen"
+            x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+
+                <!-- Modal Panel -->
+                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl"
+                    x-show="isOpen" x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+
+                    <!-- Header with Steps -->
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center border-b">
+                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Registrar Actividad
+                        </h3>
+
+                        <!-- Step Indicators -->
+                        <div class="flex space-x-2">
+                            <template x-for="i in 3">
+                                <div class="w-2.5 h-2.5 rounded-full transition-colors duration-300"
+                                    :class="step >= i ? 'bg-green-600' : 'bg-gray-300'"></div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="px-4 py-5 sm:p-6">
+                        <form id="wizardForm" th:action="@{/tareas/registro/guardar}" th:object="${nuevaTarea}"
+                            method="post">
+
+                            <!-- Step 1: Empleados (Multi-select) -->
+                            <div x-show="step === 1" x-transition:enter="transition ease-out duration-300 transform"
+                                x-transition:enter-start="opacity-0 translate-x-8"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium leading-6 text-gray-900 mb-2">Seleccione
+                                        Empleados</label>
+                                    <input type="text" x-model="search" placeholder="Buscar por nombre..."
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border">
+                                </div>
+
+                                <div
+                                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-1">
+                                    <template x-for="emp in filteredEmpleados" :key="emp.id">
+                                        <div @click="toggleEmployee(emp.id)"
+                                            class="cursor-pointer p-3 rounded border transition-all hover:shadow-md flex items-center justify-between relative"
+                                            :class="selectedEmployees.includes(emp.id) ? 'border-green-500 bg-green-50 ring-2 ring-green-500' : 'border-gray-200 hover:border-green-300'">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold"
+                                                    x-text="emp.nombre.charAt(0)"></div>
+                                                <div>
+                                                    <p class="font-medium text-gray-900" x-text="emp.nombre"></p>
+                                                    <p class="text-xs text-gray-500" x-text="emp.legajo"></p>
+                                                </div>
+                                            </div>
+                                            <div x-show="selectedEmployees.includes(emp.id)" class="text-green-600">
+                                                <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-500 text-right">
+                                    <span x-text="selectedEmployees.length"></span> empleados seleccionados
+                                </div>
+                                <!-- Hidden Inputs for List -->
+                                <template x-for="id in selectedEmployees" :key="id">
+                                    <input type="hidden" name="empleadoIds" :value="id">
+                                </template>
+                            </div>
+
+                            <!-- Step 2: Tarea & Precio -->
+                            <div x-show="step === 2" x-cloak
+                                x-transition:enter="transition ease-out duration-300 transform"
+                                x-transition:enter-start="opacity-0 translate-x-8"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <label class="block text-sm font-medium leading-6 text-gray-900 mb-2">¿Qué tarea
+                                    realizó?</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+                                    <template x-for="tipo in tipos" :key="tipo.id">
+                                        <div class="relative group">
+                                            <div @click="hasPrice(tipo.id) ? selectTipo(tipo) : null"
+                                                class="cursor-pointer p-4 rounded-lg border transition-all flex flex-col h-full"
+                                                :class="[
+                                                    formData.tipoTarea == tipo.id ? 'border-green-500 bg-green-50 ring-2 ring-green-500 scale-105' : 'border-gray-200 hover:border-green-300 hover:shadow-md',
+                                                    !hasPrice(tipo.id) ? 'opacity-75 bg-red-50 border-red-200' : 'bg-white'
+                                                ]">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <h4 class="font-bold text-gray-900" x-text="tipo.descripcion"
+                                                        :class="{'text-red-700': !hasPrice(tipo.id)}"></h4>
+                                                    <span class="text-xs bg-gray-100 text-gray-600 py-1 px-2 rounded"
+                                                        x-text="tipo.unidadMedida.nombre"></span>
+                                                </div>
+
+                                                <!-- Valid Price State -->
+                                                <div x-show="hasPrice(tipo.id)" class="mt-auto">
+                                                    <span class="text-xs text-green-600 flex items-center">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        Precio vigente activo
+                                                    </span>
+                                                </div>
+
+                                                <!-- No Price State -->
+                                                <div x-show="!hasPrice(tipo.id)"
+                                                    class="mt-auto pt-2 border-t border-red-100">
+                                                    <div class="flex flex-col gap-2">
+                                                        <span
+                                                            class="text-xs text-red-600 font-semibold flex items-center">
+                                                            <svg class="h-4 w-4 mr-1 text-red-500" fill="none"
+                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                            </svg>
+                                                            Sin precio vigente
+                                                        </span>
+                                                        <button type="button"
+                                                            @click.stop="$dispatch('open-precios-modal', { tipoId: tipo.id, tipoNombre: tipo.descripcion })"
+                                                            class="text-xs bg-red-100 hover:bg-red-200 text-red-800 py-1 px-2 rounded text-center transition flex items-center justify-center">
+                                                            <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                            Configurar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <!-- Fix: Use hidden input with explicit ID binding instead of empty select -->
+                                <input type="hidden" name="tipoTarea" x-model="formData.tipoTarea">
+                            </div>
+
+                            <!-- Step 3: Fecha & Cantidad -->
+                            <div x-show="step === 3" x-cloak
+                                x-transition:enter="transition ease-out duration-300 transform"
+                                x-transition:enter-start="opacity-0 translate-x-8"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium leading-6 text-gray-900">Fecha</label>
+                                        <input type="text" th:field="*{fecha}" x-ref="datepicker"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border"
+                                            :class="{'border-red-500 ring-1 ring-red-500': !priceStatus.valid}">
+
+                                        <!-- Validation Message -->
+                                        <div class="mt-1 text-xs min-h-[1.5em]">
+                                            <span x-show="priceStatus.valid && priceStatus.message"
+                                                class="text-green-600 font-semibold"
+                                                x-text="priceStatus.message"></span>
+                                            <span x-show="!priceStatus.valid"
+                                                class="text-red-600 font-bold flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span x-text="priceStatus.message"></span>
+                                            </span>
+                                            <span x-show="priceStatus.valid && !priceStatus.message"
+                                                class="text-gray-500">Solo fechas con precio vigente.</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium leading-6 text-gray-900">
+                                            Cantidad (<span x-text="selectedUnidad"></span>)
+                                        </label>
+                                        <input type="number" step="0.01" th:field="*{cantidad}"
+                                            x-model="formData.cantidad" required
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border"
+                                            placeholder="Ej: 150">
+                                    </div>
+
+                                    <!-- Summary Card -->
+                                    <div class="bg-gray-50 p-3 rounded border border-gray-200 mt-4">
+                                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wide">Resumen</h4>
+                                        <div class="flex justify-between mt-2 text-sm">
+                                            <span class="text-gray-600">Empleados:</span>
+                                            <span class="font-medium text-gray-900"
+                                                x-text="selectedEmployees.length + ' Seleccionados'"></span>
+                                        </div>
+                                        <div class="flex justify-between mt-1 text-sm">
+                                            <span class="text-gray-600">Tarea:</span>
+                                            <span class="font-medium text-gray-900" x-text="selectedTipoName"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <!-- Footer Buttons -->
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button type="button" @click="nextStep()" :disabled="!canProceed()"
+                            :class="!canProceed() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-500'"
+                            class="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-bold text-white shadow-sm sm:ml-3 sm:w-auto transition-colors"
+                            x-text="step === 3 ? 'Confirmar y Guardar' : 'Siguiente'">
+                        </button>
+                        <button type="button" @click="prevStep()" x-show="step > 1"
+                            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                            Atrás
+                        </button>
+                        <button type="button" @click="isOpen = false"
+                            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:mr-auto">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alpine Logic -->
+        <script th:inline="javascript">
+            function registroWizard() {
+                return {
+                    isOpen: false,
+                    step: 1,
+                    empleados: /*[[${empleados}]]*/[],
+                    tipos: /*[[${tipos}]]*/[],
+                    tareasConPrecio: /*[[${tareasConPrecio}]]*/{},
+                    fp: null,
+                    minDate: null,
+                    loadingPrecios: false,
+
+                    // State
+                    search: '',
+                    selectedEmployees: [], // List of IDs
+
+                    // Form Data
+                    formData: {
+                        tipoTarea: '',
+                        fecha: '',
+                        cantidad: ''
+                    },
+                    priceStatus: { valid: true, message: '' },
+                    selectedTipoName: '',
+                    selectedUnidad: '',
+
+                    get filteredEmpleados() {
+                        if (this.search === '') return this.empleados;
+                        return this.empleados.filter(e =>
+                            e.nombre.toLowerCase().includes(this.search.toLowerCase()) ||
+                            e.legajo.toLowerCase().includes(this.search.toLowerCase())
+                        );
+                    },
+
+                    toggleEmployee(id) {
+                        if (this.selectedEmployees.includes(id)) {
+                            this.selectedEmployees = this.selectedEmployees.filter(empId => empId !== id);
+                        } else {
+                            this.selectedEmployees.push(id);
+                        }
+                    },
+
+                    hasPrice(tipoId) {
+                        return this.tareasConPrecio[tipoId] === true;
+                    },
+
+                    markPriceAsActive(tipoId) {
+                        this.tareasConPrecio[tipoId] = true;
+                    },
+
+                    openModal() {
+                        this.isOpen = true;
+                        this.step = 1;
+                        this.resetForm();
+                    },
+
+                    resetForm() {
+                        this.formData = { tipoTarea: '', fecha: '', cantidad: '' };
+                        this.selectedEmployees = [];
+                        this.search = '';
+                        this.selectedTipoName = '';
+                        this.minDate = null;
+                        if (this.fp) this.fp.clear();
+                    },
+
+                    selectTipo(tipo) {
+                        this.formData.tipoTarea = tipo.id;
+                        this.selectedTipoName = tipo.descripcion;
+                        this.selectedUnidad = tipo.unidadMedida.nombre;
+                        // Always valid if hasPrice is true for today, but we can double check logic
+                        this.minDate = null; // Assuming today is valid
+                        // Optional: Fetch specific dates valid via API if needed, but for now we rely on the pre-check
+                    },
+
+                    initDatepicker() {
+                        if (this.fp) return;
+                        this.$nextTick(() => {
+                            this.fp = flatpickr(this.$refs.datepicker, {
+                                locale: 'es',
+                                dateFormat: 'Y-m-d',
+                                disableMobile: "true",
+                                defaultDate: 'today',
+                                maxDate: 'today', // Assuming we register for past/present
+                                onChange: (selectedDates, dateStr) => {
+                                    this.formData.fecha = dateStr;
+                                    this.validatePrice();
+                                }
+                            });
+                        });
+                    },
+
+                    updateDatepickerConstraints() {
+                        // Logic simplified as we pre-validate
+                    },
+
+                    nextStep() {
+                        if (this.step === 3) {
+                            // Submit
+                            document.querySelector('#wizardForm').submit();
+                        } else {
+                            if (this.step === 2) {
+                                this.initDatepicker();
+                                // Validate default 'today' on step entry
+                                this.$nextTick(() => {
+                                    if (this.formData.fecha) this.validatePrice();
+                                });
+                            }
+                            this.step++;
+                        }
+                    },
+
+                    prevStep() {
+                        if (this.step > 1) this.step--;
+                    },
+
+                    canProceed() {
+                        if (this.step === 1) return this.selectedEmployees.length > 0;
+                        if (this.step === 2) return !!this.formData.tipoTarea;
+                        if (this.step === 3) return !!this.formData.fecha && !!this.formData.cantidad && this.priceStatus.valid;
+                        return false;
+                    },
+
+                    async validatePrice() {
+                        if (!this.formData.tipoTarea || !this.formData.fecha) return;
+
+                        // Temporary loading state if desired, but fast enough
+                        try {
+                            const response = await fetch(`/tareas/api/check-precio?tipoId=${this.formData.tipoTarea}&fecha=${this.formData.fecha}`);
+                            const data = await response.json();
+
+                            if (data.valid) {
+                                this.priceStatus = {
+                                    valid: true,
+                                    message: `Precio vigente: $${data.precio}`
+                                };
+                            } else {
+                                this.priceStatus = {
+                                    valid: false,
+                                    message: data.message || "No hay precio para esta fecha"
+                                };
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            this.priceStatus = { valid: false, message: "Error verificación conexión" };
+                        }
+                    }
+                }
+            }
+        </script>
+    </div>
+</body>
+
+</html>

@@ -13,8 +13,8 @@ public class TipoTarea {
     @Column(nullable = false)
     private String descripcion;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "unidad_medida_id", nullable = false)
     private UnidadMedida unidadMedida;
 
     public TipoTarea() {

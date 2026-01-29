@@ -22,6 +22,10 @@ public class Almacen {
 
     private boolean activo = true;
 
+    @ManyToOne
+    @JoinColumn(name = "encargado_id")
+    private Usuario encargado;
+
     public Almacen() {
     }
 
@@ -79,5 +83,13 @@ public class Almacen {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public Usuario getEncargado() {
+        return encargado;
+    }
+
+    public void setEncargado(Usuario encargado) {
+        this.encargado = encargado;
     }
 }

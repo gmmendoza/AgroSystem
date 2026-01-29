@@ -25,10 +25,8 @@
                                 Medida</label>
                             <select th:field="*{unidadMedida}" id="unidadMedida"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                <option value="KILO">Kilo</option>
-                                <option value="HECTAREA">Hectárea</option>
-                                <option value="DIA">Día</option>
-                                <option value="HORA">Hora</option>
+                                <option th:each="u : ${unidadesMedida}" th:value="${u.id}" th:text="${u.nombre}">
+                                </option>
                             </select>
                         </div>
                         <button type="submit"
@@ -58,7 +56,7 @@
                                     <span th:text="${tipo.descripcion}" class="font-medium">Cosecha</span>
                                 </td>
                                 <td class="py-3 px-6 text-left">
-                                    <span th:text="${tipo.unidadMedida}">KILO</span>
+                                    <span th:text="${tipo.unidadMedida.nombre}">KILO</span>
                                 </td>
                             </tr>
                         </tbody>

@@ -44,7 +44,8 @@ public class TareaService {
     }
 
     public Optional<Double> findPrecioVigente(TipoTarea tipoTarea, LocalDate fecha) {
-        return precioTareaRepository.findPrecioVigente(tipoTarea, fecha)
+        return precioTareaRepository
+                .findTopByTipoTareaAndFechaVigenciaLessThanEqualOrderByFechaVigenciaDesc(tipoTarea, fecha)
                 .map(PrecioTarea::getValor);
     }
 
@@ -94,5 +95,11 @@ public class TareaService {
     public List<TareaRealizada> filtrarTareas(Long empleadoId, Long tipoTareaId, LocalDate fechaInicio,
             LocalDate fechaFin) {
         return tareaRealizadaRepository.findByFilters(empleadoId, tipoTareaId, fechaInicio, fechaFin);
+    }
+
+    public org.springframework.data.domain.Page<TareaRealizada> filtrarTareasPaginado(Long empleadoId, Long tipoTareaId,
+            LocalDate fechaInicio, LocalDate fechaFin, org.springframework.data.domain.Pageable pageable) {
+        return tareaRealizadaRepository.findByFiltersPaginated(empleadoId, tipoTareaId, fechaInicio, fechaFin,
+                pageable);
     }
 }
