@@ -69,6 +69,7 @@ public class DashboardController {
                 // 2. Top 5 empleados más productivos (por monto total)
                 Map<String, Double> empleadoTotales = new LinkedHashMap<>();
                 todasTareas.stream()
+                                .filter(t -> t.getEmpleado() != null && t.getEmpleado().getNombre() != null)
                                 .collect(Collectors.groupingBy(
                                                 t -> t.getEmpleado().getNombre(),
                                                 Collectors.summingDouble(t -> t.getCantidad() * t.getPrecioAplicado())))
@@ -106,6 +107,7 @@ public class DashboardController {
 
                 // 4. Distribution by Task Type (Pie Chart)
                 Map<String, Long> tareasPorTipo = todasTareas.stream()
+                                .filter(t -> t.getTipoTarea() != null && t.getTipoTarea().getDescripcion() != null)
                                 .collect(Collectors.groupingBy(
                                                 t -> t.getTipoTarea().getDescripcion(),
                                                 Collectors.counting()));

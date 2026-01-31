@@ -82,13 +82,13 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedRolesAndUsers() {
         if (rolRepository.count() == 0) {
-            Rol adminRole = new Rol("ROLE_ADMIN", "Administrador del sistema");
-            Rol userRole = new Rol("ROLE_USER", "Usuario estándar");
+            Rol adminRole = new Rol("ADMIN", "Administrador del sistema");
+            Rol userRole = new Rol("USER", "Usuario estándar");
             rolRepository.saveAll(Arrays.asList(adminRole, userRole));
 
-            Usuario admin = new Usuario("admin", passwordEncoder.encode("admin"), "admin@agro.com", "Administrador",
+            Usuario admin = new Usuario("admin", passwordEncoder.encode("admin123"), "admin@agro.com", "Administrador",
                     adminRole);
-            Usuario user = new Usuario("user", passwordEncoder.encode("user"), "user@agro.com", "Usuario Test",
+            Usuario user = new Usuario("user", passwordEncoder.encode("user123"), "user@agro.com", "Usuario Test",
                     userRole);
             usuarioRepository.saveAll(Arrays.asList(admin, user));
             System.out.println("Usuarios y Roles creados.");

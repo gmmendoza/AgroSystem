@@ -129,9 +129,9 @@
             <div th:if="${!#lists.isEmpty(tareasHoy)}"
                 class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div th:each="tarea : ${tareasHoy}" class="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
-                    <div class="font-semibold" th:text="${tarea.empleado.nombre}">Empleado</div>
+                    <div class="font-semibold" th:text="${tarea.empleado?.nombre ?: 'Sin asignar'}">Empleado</div>
                     <div class="text-sm text-green-100"
-                        th:text="${tarea.tipoTarea.descripcion + ' - ' + tarea.cantidad + ' ' + tarea.tipoTarea.unidadMedida.nombre}">
+                        th:text="${(tarea.tipoTarea?.descripcion ?: 'N/A') + ' - ' + tarea.cantidad + ' ' + (tarea.tipoTarea?.unidadMedida?.nombre ?: '')}">
                         Tarea</div>
                 </div>
             </div>
@@ -336,10 +336,11 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-800" th:text="${tarea.empleado.nombre}">Empleado
+                                    <p class="font-semibold text-gray-800"
+                                        th:text="${tarea.empleado?.nombre ?: 'Sin asignar'}">Empleado
                                     </p>
                                     <p class="text-sm text-gray-600"
-                                        th:text="${tarea.tipoTarea.descripcion + ' - ' + tarea.cantidad + ' ' + tarea.tipoTarea.unidadMedida.nombre}">
+                                        th:text="${(tarea.tipoTarea?.descripcion ?: 'N/A') + ' - ' + tarea.cantidad + ' ' + (tarea.tipoTarea?.unidadMedida?.nombre ?: '')}">
                                         Tarea</p>
                                 </div>
                             </div>
