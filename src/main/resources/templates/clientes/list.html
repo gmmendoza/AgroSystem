@@ -40,8 +40,7 @@
                 <!-- Barra de búsqueda -->
                 <div class="relative">
                     <input type="text" id="searchInput" placeholder="Buscar cliente..."
-                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-64"
-                        onkeyup="filterTable()">
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-64">
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -58,7 +57,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden" id="tableContainer">
             <div class="overflow-x-auto">
                 <table class="min-w-full table-auto" id="dataTable">
                     <thead>
@@ -195,82 +194,56 @@
     </div>
 
     <script>
-        // Variables de paginación
         let currentPage = 1;
         const itemsPerPage = 10;
         let allRows = [];
         let filteredRows = [];
         let sortDirection = {};
 
-        // Inicializar al cargar
         document.addEventListener('DOMContentLoaded', function () {
             const tbody = document.getElementById('tableBody');
             allRows = Array.from(tbody.querySelectorAll('tr'));
             filteredRows = [...allRows];
             updatePagination();
+
+            // Bind search input
+            document.getElementById('searchInput').addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase();
+                filteredRows = allRows.filter(row => row.textContent.toLowerCase().includes(searchTerm));
+                currentPage = 1;
+                updatePagination();
+            });
         });
 
-        // Filtrar tabla
-        function filterTable() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-
-            filteredRows = allRows.filter(row => {
-                const text = row.textContent.toLowerCase();
-                return text.includes(searchTerm);
-            });
-
-            currentPage = 1;
-            updatePagination();
-        }
-
-        // Ordenar tabla
         function sortTable(columnIndex) {
             const direction = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
             sortDirection = { [columnIndex]: direction };
-
             filteredRows.sort((a, b) => {
                 const aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
                 const bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
-
-                if (direction === 'asc') {
-                    return aValue.localeCompare(bValue);
-                } else {
-                    return bValue.localeCompare(aValue);
-                }
+                return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
             });
-
             currentPage = 1;
             updatePagination();
         }
 
-        // Actualizar paginación
         function updatePagination() {
-            const tbody = document.getElementById('tableBody');
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
-            // Ocultar todas las filas
             allRows.forEach(row => row.style.display = 'none');
+            filteredRows.slice(startIndex, endIndex).forEach(row => row.style.display = '');
 
-            // Mostrar solo las filas de la página actual
-            filteredRows.slice(startIndex, endIndex).forEach(row => {
-                row.style.display = '';
-            });
-
-            // Actualizar contadores
             document.getElementById('showingStart').textContent = filteredRows.length > 0 ? startIndex + 1 : 0;
             document.getElementById('showingEnd').textContent = Math.min(endIndex, filteredRows.length);
             document.getElementById('totalItems').textContent = filteredRows.length;
 
-            // Actualizar botones
             document.getElementById('prevBtn').disabled = currentPage === 1;
             document.getElementById('nextBtn').disabled = currentPage >= totalPages || totalPages === 0;
 
-            // Generar números de página
             const pageNumbers = document.getElementById('pageNumbers');
             pageNumbers.innerHTML = '';
-
             for (let i = 1; i <= Math.min(totalPages, 5); i++) {
                 const btn = document.createElement('button');
                 btn.textContent = i;
@@ -279,9 +252,8 @@
                 pageNumbers.appendChild(btn);
             }
 
-            // Mostrar/ocultar empty state
             const emptyState = document.getElementById('emptyState');
-            const tableContainer = document.querySelector('.bg-white.shadow-md');
+            const tableContainer = document.getElementById('tableContainer');
             if (filteredRows.length === 0) {
                 emptyState.classList.remove('hidden');
                 tableContainer.classList.add('hidden');
@@ -291,25 +263,9 @@
             }
         }
 
-        function prevPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                updatePagination();
-            }
-        }
-
-        function nextPage() {
-            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                updatePagination();
-            }
-        }
-
-        function goToPage(page) {
-            currentPage = page;
-            updatePagination();
-        }
+        function prevPage() { if (currentPage > 1) { currentPage--; updatePagination(); } }
+        function nextPage() { const totalPages = Math.ceil(filteredRows.length / itemsPerPage); if (currentPage < totalPages) { currentPage++; updatePagination(); } }
+        function goToPage(page) { currentPage = page; updatePagination(); }
     </script>
 </body>
 

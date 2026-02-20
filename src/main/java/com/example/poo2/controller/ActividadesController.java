@@ -61,13 +61,45 @@ public class ActividadesController {
                 model.addAttribute("tipos", tipos);
 
                 Map<Long, Boolean> tareasConPrecio = new HashMap<>();
+                Map<Long, Double> preciosVigentes = new HashMap<>();
                 // Check active price for TODAY
                 java.time.LocalDate today = java.time.LocalDate.now();
                 tipos.forEach(t -> {
-                        tareasConPrecio.put(t.getId(), tareaService.findPrecioVigente(t, today).isPresent());
+                        tareaService.findPrecioVigente(t, today).ifPresent(precio -> {
+                                tareasConPrecio.put(t.getId(), true);
+                                preciosVigentes.put(t.getId(), precio);
+                        });
+                        if (!tareasConPrecio.containsKey(t.getId())) {
+                                tareasConPrecio.put(t.getId(), false);
+                        }
                 });
                 model.addAttribute("tareasConPrecio", tareasConPrecio);
+                model.addAttribute("preciosVigentes", preciosVigentes);
                 model.addAttribute("unidadesMedida", unidadMedidaRepository.findAll());
+
+                // Chart data: tiposConPrecios list with price history
+                java.util.List<Map<String, Object>> tiposConPrecios = new java.util.ArrayList<>();
+                for (TipoTarea tipo : tipos) {
+                        Map<String, Object> entry = new HashMap<>();
+                        entry.put("id", tipo.getId());
+                        entry.put("descripcion", tipo.getDescripcion());
+                        java.util.List<Map<String, Object>> precios = tareaService.findPreciosByTipo(tipo).stream()
+                                        .sorted(java.util.Comparator.comparing(p -> p.getFechaVigencia()))
+                                        .map(p -> {
+                                                Map<String, Object> m = new HashMap<>();
+                                                m.put("fecha", p.getFechaVigencia().toString());
+                                                m.put("valor", p.getValor());
+                                                return m;
+                                        })
+                                        .collect(java.util.stream.Collectors.toList());
+                        entry.put("precios", precios);
+                        tiposConPrecios.add(entry);
+                }
+                model.addAttribute("tiposConPrecios", tiposConPrecios);
+                // String-key map for JS inline
+                Map<String, Object> preciosVigentesDataMap = new HashMap<>();
+                preciosVigentes.forEach((k, v) -> preciosVigentesDataMap.put(String.valueOf(k), v));
+                model.addAttribute("preciosVigentesDataMap", preciosVigentesDataMap);
 
                 // Pass filter params back
                 model.addAttribute("empleadoId", empleadoId);

@@ -4,8 +4,10 @@ import com.example.poo2.model.Empleado;
 import com.example.poo2.model.PrecioTarea;
 import com.example.poo2.model.TareaRealizada;
 import com.example.poo2.model.TipoTarea;
+import com.example.poo2.model.UnidadMedida;
 import com.example.poo2.service.EmpleadoService;
 import com.example.poo2.service.TareaService;
+import com.example.poo2.repository.UnidadMedidaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,40 +31,141 @@ public class TareaController {
     private EmpleadoService empleadoService;
 
     @Autowired
-    private com.example.poo2.repository.UnidadMedidaRepository unidadMedidaRepository;
+    private UnidadMedidaRepository unidadMedidaRepository;
 
     // --- Tipos de Tarea ---
 
     @GetMapping("/tipos")
     public String listTipos(Model model) {
-        model.addAttribute("tipos", tareaService.findAllTipos());
+        List<TipoTarea> tipos = tareaService.findAllTipos();
+        // Enrich each type with its current price
+        Map<Long, Double> preciosVigentes = new HashMap<>();
+        LocalDate hoy = LocalDate.now();
+        for (TipoTarea tipo : tipos) {
+            tareaService.findPrecioVigente(tipo, hoy)
+                    .ifPresent(precio -> preciosVigentes.put(tipo.getId(), precio));
+        }
+        model.addAttribute("tipos", tipos);
+        model.addAttribute("preciosVigentes", preciosVigentes);
         model.addAttribute("tipoTarea", new TipoTarea());
         model.addAttribute("unidadesMedida", unidadMedidaRepository.findAll());
         return "tareas/tipos";
     }
 
+    @GetMapping("/tipos/editar/{id}")
+    public String editarTipo(@PathVariable Long id, Model model) {
+        tareaService.findTipoById(id).ifPresent(tipo -> model.addAttribute("tipoTarea", tipo));
+        model.addAttribute("tipos", tareaService.findAllTipos());
+        Map<Long, Double> preciosVigentes = new HashMap<>();
+        LocalDate hoy = LocalDate.now();
+        for (TipoTarea tipo : tareaService.findAllTipos()) {
+            tareaService.findPrecioVigente(tipo, hoy)
+                    .ifPresent(precio -> preciosVigentes.put(tipo.getId(), precio));
+        }
+        model.addAttribute("preciosVigentes", preciosVigentes);
+        model.addAttribute("unidadesMedida", unidadMedidaRepository.findAll());
+        model.addAttribute("editando", true);
+        return "tareas/tipos";
+    }
+
     @PostMapping("/tipos/guardar")
-    public String saveTipo(@ModelAttribute TipoTarea tipoTarea) {
+    public String saveTipo(@ModelAttribute TipoTarea tipoTarea,
+            @RequestParam(required = false) Long unidadMedidaId,
+            RedirectAttributes redirectAttributes) {
+        if (unidadMedidaId != null) {
+            UnidadMedida um = new UnidadMedida();
+            um.setId(unidadMedidaId);
+            tipoTarea.setUnidadMedida(um);
+        }
         tareaService.saveTipo(tipoTarea);
-        return "redirect:/actividades?tab=config";
+        String msg = (tipoTarea.getId() != null) ? "Tipo de tarea actualizado correctamente."
+                : "Tipo de tarea creado correctamente.";
+        redirectAttributes.addFlashAttribute("success", msg);
+        return "redirect:/tareas/tipos";
+    }
+
+    @GetMapping("/tipos/eliminar/{id}")
+    public String eliminarTipo(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            tareaService.deleteTipo(id);
+            redirectAttributes.addFlashAttribute("success", "Tipo de tarea eliminado correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "No se puede eliminar: el tipo tiene actividades registradas.");
+        }
+        return "redirect:/tareas/tipos";
     }
 
     // --- Precios ---
 
     @GetMapping("/precios")
     public String listPrecios(@RequestParam(required = false) Long tipoId, Model model) {
-        model.addAttribute("tipos", tareaService.findAllTipos());
-        if (tipoId != null) {
-            // Logic to filter prices by type could go here
+        List<TipoTarea> tipos = tareaService.findAllTipos();
+        model.addAttribute("tipos", tipos);
+        model.addAttribute("tipoId", tipoId);
+
+        // Prepare all prices per type as JSON-ready structure for the chart
+        // tiposConPrecios: list of { id, descripcion, precios: [{fecha, valor}] }
+        java.util.List<Map<String, Object>> tiposConPrecios = new java.util.ArrayList<>();
+        for (TipoTarea tipo : tipos) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("id", tipo.getId());
+            entry.put("descripcion", tipo.getDescripcion());
+            List<Map<String, Object>> precios = tareaService.findPreciosByTipo(tipo).stream()
+                    .sorted(java.util.Comparator.comparing(p -> p.getFechaVigencia()))
+                    .map(p -> {
+                        Map<String, Object> m = new HashMap<>();
+                        m.put("fecha", p.getFechaVigencia().toString());
+                        m.put("valor", p.getValor());
+                        return m;
+                    })
+                    .collect(Collectors.toList());
+            entry.put("precios", precios);
+            tiposConPrecios.add(entry);
         }
-        model.addAttribute("precioTarea", new PrecioTarea());
+        model.addAttribute("tiposConPrecios", tiposConPrecios);
+
+        // Precios vigentes hoy (for sidebar summary + JS inline map)
+        Map<Long, Double> preciosVigentes = new HashMap<>();
+        LocalDate hoy = LocalDate.now();
+        for (TipoTarea tipo : tipos) {
+            tareaService.findPrecioVigente(tipo, hoy)
+                    .ifPresent(precio -> preciosVigentes.put(tipo.getId(), precio));
+        }
+        model.addAttribute("preciosVigentes", preciosVigentes);
+        // Convert to String keys for Thymeleaf inline JS compatibility
+        Map<String, Object> preciosVigentesDataMap = new HashMap<>();
+        preciosVigentes.forEach((k, v) -> preciosVigentesDataMap.put(String.valueOf(k), v));
+        model.addAttribute("preciosVigentesDataMap", preciosVigentesDataMap);
+
+        PrecioTarea precioTarea = new PrecioTarea();
+        if (tipoId != null) {
+            TipoTarea tipo = new TipoTarea();
+            tipo.setId(tipoId);
+            precioTarea.setTipoTarea(tipo);
+        }
+        model.addAttribute("precioTarea", precioTarea);
         return "tareas/precios";
     }
 
     @PostMapping("/precios/guardar")
-    public String savePrecio(@ModelAttribute PrecioTarea precioTarea) {
-        tareaService.savePrecio(precioTarea);
-        return "redirect:/actividades?tab=config";
+    public String savePrecio(@RequestParam Long tipoTareaId,
+            @RequestParam Double valor,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaVigencia,
+            RedirectAttributes redirectAttributes) {
+        try {
+            PrecioTarea precioTarea = new PrecioTarea();
+            TipoTarea tipo = new TipoTarea();
+            tipo.setId(tipoTareaId);
+            precioTarea.setTipoTarea(tipo);
+            precioTarea.setValor(valor);
+            precioTarea.setFechaVigencia(fechaVigencia);
+            tareaService.savePrecio(precioTarea);
+            redirectAttributes.addFlashAttribute("success", "Precio guardado correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al guardar precio: " + e.getMessage());
+        }
+        return "redirect:/tareas/precios?tipoId=" + tipoTareaId;
     }
 
     // --- Registro de Actividad ---

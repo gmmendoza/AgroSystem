@@ -40,8 +40,7 @@
                 <!-- Barra de búsqueda -->
                 <div class="relative">
                     <input type="text" id="searchInput" placeholder="Buscar empleado..."
-                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-64"
-                        onkeyup="filterTable()">
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-64">
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -58,7 +57,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden" id="tableContainer">
             <div class="overflow-x-auto">
                 <table class="min-w-full table-auto" id="dataTable">
                     <thead>
@@ -191,14 +190,15 @@
             allRows = Array.from(tbody.querySelectorAll('tr'));
             filteredRows = [...allRows];
             updatePagination();
-        });
 
-        function filterTable() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            filteredRows = allRows.filter(row => row.textContent.toLowerCase().includes(searchTerm));
-            currentPage = 1;
-            updatePagination();
-        }
+            // Bind search input via addEventListener to avoid race condition
+            document.getElementById('searchInput').addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase();
+                filteredRows = allRows.filter(row => row.textContent.toLowerCase().includes(searchTerm));
+                currentPage = 1;
+                updatePagination();
+            });
+        });
 
         function sortTable(columnIndex) {
             const direction = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
@@ -213,7 +213,6 @@
         }
 
         function updatePagination() {
-            const tbody = document.getElementById('tableBody');
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
@@ -239,7 +238,7 @@
             }
 
             const emptyState = document.getElementById('emptyState');
-            const tableContainer = document.querySelector('.bg-white.shadow-md');
+            const tableContainer = document.getElementById('tableContainer');
             if (filteredRows.length === 0) {
                 emptyState.classList.remove('hidden');
                 tableContainer.classList.add('hidden');

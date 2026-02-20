@@ -6,69 +6,219 @@
 </head>
 
 <body>
+    <div layout:fragment="breadcrumbs">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-green-600">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
+                            </path>
+                        </svg>
+                        Inicio
+                    </a>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Configuración</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+
     <div layout:fragment="content">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <h1 class="text-2xl font-bold text-gray-800">Tipos de Tarea</h1>
+            <a href="/tareas/precios"
+                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
+                </svg>
+                Gestionar Precios
+            </a>
+        </div>
+
         <div class="flex flex-col md:flex-row gap-6">
             <!-- Formulario -->
             <div class="w-full md:w-1/3">
-                <div class="bg-white p-6 rounded shadow">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Nuevo Tipo de Tarea</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"
+                                th:if="${!editando}"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                th:if="${editando}"></path>
+                        </svg>
+                        <span th:text="${editando ? 'Editar Tipo de Tarea' : 'Nuevo Tipo de Tarea'}">Nuevo Tipo de
+                            Tarea</span>
+                    </h2>
                     <form th:action="@{/tareas/tipos/guardar}" th:object="${tipoTarea}" method="post">
+                        <input type="hidden" th:field="*{id}">
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2"
                                 for="descripcion">Descripción</label>
                             <input type="text" th:field="*{descripcion}" id="descripcion"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-400"
                                 required>
                         </div>
                         <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="unidadMedida">Unidad de
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="unidadMedidaId">Unidad de
                                 Medida</label>
-                            <select th:field="*{unidadMedida}" id="unidadMedida"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                <option th:each="u : ${unidadesMedida}" th:value="${u.id}" th:text="${u.nombre}">
+                            <select name="unidadMedidaId" id="unidadMedidaId"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-400">
+                                <option th:each="u : ${unidadesMedida}" th:value="${u.id}" th:text="${u.nombre}"
+                                    th:selected="${tipoTarea.unidadMedida != null and tipoTarea.unidadMedida.id == u.id}">
                                 </option>
                             </select>
                         </div>
-                        <button type="submit"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
-                            Guardar
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="submit"
+                                class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span th:text="${editando ? 'Actualizar' : 'Guardar'}">Guardar</span>
+                            </button>
+                            <a th:if="${editando}" href="/tareas/tipos"
+                                class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded text-center">
+                                Cancelar
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
 
             <!-- Listado -->
             <div class="w-full md:w-2/3">
-                <div class="bg-white shadow rounded overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-xl font-bold text-gray-800">Tipos Definidos</h2>
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+                        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                            Tipos Definidos
+                        </h2>
                     </div>
-                    <table class="min-w-full table-auto">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                                <th class="py-3 px-6 text-left">Descripción</th>
-                                <th class="py-3 px-6 text-left">Unidad</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-gray-600 text-sm font-light">
-                            <tr th:each="tipo : ${tipos}" class="border-b border-gray-200 hover:bg-gray-100">
-                                <td class="py-3 px-6 text-left whitespace-nowrap">
-                                    <span th:text="${tipo.descripcion}" class="font-medium">Cosecha</span>
-                                </td>
-                                <td class="py-3 px-6 text-left">
-                                    <span th:text="${tipo.unidadMedida.nombre}">KILO</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-4 text-right">
-                    <a href="/tareas/precios" class="text-blue-500 hover:text-blue-800 font-bold">Gestionar Precios
-                        &rarr;</a>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto">
+                            <thead>
+                                <tr
+                                    class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                                    <th class="py-3 px-6 text-left">Descripción</th>
+                                    <th class="py-3 px-6 text-left">Unidad</th>
+                                    <th class="py-3 px-6 text-left">Precio Vigente</th>
+                                    <th class="py-3 px-6 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light">
+                                <tr th:each="tipo : ${tipos}"
+                                    class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap">
+                                        <span th:text="${tipo.descripcion}"
+                                            class="font-medium text-gray-800">Cosecha</span>
+                                    </td>
+                                    <td class="py-3 px-6 text-left">
+                                        <span
+                                            class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold"
+                                            th:text="${tipo.unidadMedida.nombre}">KILO</span>
+                                    </td>
+                                    <td class="py-3 px-6 text-left">
+                                        <span th:if="${preciosVigentes[tipo.id] != null}"
+                                            class="font-bold text-green-600"
+                                            th:text="${'$' + #numbers.formatDecimal(preciosVigentes[tipo.id], 0, 'COMMA', 2, 'POINT')}">$0</span>
+                                        <span th:if="${preciosVigentes[tipo.id] == null}"
+                                            class="text-red-500 text-xs flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                                </path>
+                                            </svg>
+                                            Sin precio
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-6 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <!-- Edit button -->
+                                            <a th:href="@{/tareas/tipos/editar/{id}(id=${tipo.id})}"
+                                                class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                                                title="Editar">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                                                    </path>
+                                                </svg>
+                                            </a>
+                                            <!-- Precio button -->
+                                            <a th:href="@{/tareas/precios(tipoId=${tipo.id})}"
+                                                class="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition-colors"
+                                                title="Gestionar Precios">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                    </path>
+                                                </svg>
+                                            </a>
+                                            <!-- Delete button -->
+                                            <a href="javascript:void(0)"
+                                                th:data-url="@{/tareas/tipos/eliminar/{id}(id=${tipo.id})}"
+                                                th:data-nombre="${tipo.descripcion}" onclick="confirmDeleteTipo(this)"
+                                                class="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors cursor-pointer"
+                                                title="Eliminar">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                    </path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(tipos)}">
+                                    <td colspan="4" class="py-8 text-center text-gray-500">
+                                        No hay tipos de tarea definidos aún.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function confirmDeleteTipo(el) {
+            const url = el.getAttribute('data-url');
+            const nombre = el.getAttribute('data-nombre');
+            showConfirmModal(
+                '¿Eliminar tipo de tarea?',
+                'Se eliminará el tipo "' + nombre + '". Esta acción no se puede deshacer.',
+                'Sí, eliminar',
+                function () {
+                    window.location.href = url;
+                }
+            );
+        }
+    </script>
 </body>
 
 </html>

@@ -1,5 +1,6 @@
 package com.example.poo2.controller;
 
+import com.example.poo2.model.TipoTarea;
 import com.example.poo2.model.TareaRealizada;
 import com.example.poo2.service.ClienteService;
 import com.example.poo2.service.EmpleadoService;
@@ -53,7 +54,7 @@ public class DashboardController {
                                 .collect(Collectors.toList());
                 model.addAttribute("tareasRecientes", tareasRecientes);
 
-                // === NUEVOS DATOS PARA DASHBOARD MEJORADO ===
+                // === DATOS PARA DASHBOARD MEJORADO ===
 
                 // 1. Actividades del día (hoy)
                 LocalDate hoy = LocalDate.now();

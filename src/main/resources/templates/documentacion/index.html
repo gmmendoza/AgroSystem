@@ -218,9 +218,26 @@
                     </svg>
                     Retrospectiva
                 </button>
+                <button onclick="showTab('dp2')" id="tab-dp2"
+                    class="tab-button flex items-center px-6 py-4 font-semibold text-gray-700">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    DP Iteracion 2
+                </button>
+                <button onclick="showTab('retro2')" id="tab-retro2"
+                    class="tab-button flex items-center px-6 py-4 font-semibold text-gray-700">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                        </path>
+                    </svg>
+                    Retrospectiva 2
+                </button>
                 <button onclick="showTab('roadmap')" id="tab-roadmap"
                     class="tab-button flex items-center px-6 py-4 font-semibold text-gray-700">
-                    <!-- Heroicon: map -->
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
@@ -299,11 +316,53 @@
                     </div>
                 </div>
 
+                <!-- DP Iteración 2 Content -->
+                <div id="content-dp2" class="tab-content">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-blue-100 p-3 rounded-lg mr-4">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 13v-1m4 1v-3m4 3V8M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Diseno y Planificacion - Iteracion 2</h2>
+                            <p class="text-gray-600">Nuevas funcionalidades: Liquidaciones, Cuentas Corrientes, Mejoras
+                                UI</p>
+                        </div>
+                    </div>
+                    <div class="markdown-content bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div id="render-dp2" class="prose max-w-none"></div>
+                        <textarea id="source-dp2" style="display:none;" th:text="${dpIteracion2}"></textarea>
+                    </div>
+                </div>
+
+                <!-- Retrospectiva 2 Content -->
+                <div id="content-retro2" class="tab-content">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-purple-100 p-3 rounded-lg mr-4">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Retrospectiva - Iteracion 2</h2>
+                            <p class="text-gray-600">Lo que hicimos bien, lo que nos costo y mejoras para la proxima</p>
+                        </div>
+                    </div>
+                    <div class="markdown-content bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div id="render-retro2" class="prose max-w-none"></div>
+                        <textarea id="source-retro2" style="display:none;" th:text="${retrospectiva2}"></textarea>
+                    </div>
+                </div>
+
                 <!-- Roadmap Content -->
                 <div id="content-roadmap" class="tab-content">
                     <div class="flex items-center mb-6">
                         <div class="bg-orange-100 p-3 rounded-lg mr-4">
-                            <!-- Heroicon: rocket-launch -->
                             <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z">
@@ -370,6 +429,8 @@
                 renderMarkdown('erp');
                 renderMarkdown('dp');
                 renderMarkdown('retro');
+                renderMarkdown('dp2');
+                renderMarkdown('retro2');
                 renderMarkdown('roadmap');
             });
 

@@ -1,8 +1,12 @@
 package com.example.poo2.config;
 
+import com.example.poo2.model.EstadoLiquidacion;
 import com.example.poo2.model.Rol;
+import com.example.poo2.model.UnidadMedida;
 import com.example.poo2.model.Usuario;
+import com.example.poo2.repository.EstadoLiquidacionRepository;
 import com.example.poo2.repository.RolRepository;
+import com.example.poo2.repository.UnidadMedidaRepository;
 import com.example.poo2.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -20,6 +24,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EstadoLiquidacionRepository estadoLiquidacionRepository;
+
+    @Autowired
+    private UnidadMedidaRepository unidadMedidaRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -53,5 +63,26 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.save(admin);
             System.out.println("✅ Usuario admin creado exitosamente");
         }
+
+        // Sembrar Unidades de Medida si no existen
+        if (unidadMedidaRepository.count() == 0) {
+            String[] unidades = { "Kilogramo", "Hectárea", "Día", "Hora", "Tonelada", "Unidad" };
+            for (String nombre : unidades) {
+                UnidadMedida um = new UnidadMedida(nombre);
+                unidadMedidaRepository.save(um);
+            }
+            System.out.println("✅ Unidades de medida creadas");
+        }
+
+        // Sembrar Estados de Liquidación si no existen
+        String[] estados = { "Pendiente", "Aprobada", "Pagada", "Cancelada" };
+        for (String nombre : estados) {
+            estadoLiquidacionRepository.findByNombre(nombre)
+                    .orElseGet(() -> {
+                        EstadoLiquidacion estado = new EstadoLiquidacion(nombre);
+                        return estadoLiquidacionRepository.save(estado);
+                    });
+        }
+        System.out.println("✅ Estados de liquidación verificados");
     }
 }

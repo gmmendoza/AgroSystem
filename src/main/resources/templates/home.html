@@ -100,86 +100,8 @@
             </div>
         </div>
 
-        <!-- Actividades del Día - Destacado -->
-        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 mb-8 text-white">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold mb-1 flex items-center gap-2">
-                        <svg class="w-8 h-8 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                            </path>
-                        </svg>
-                        Actividades de Hoy
-                    </h2>
-                    <p class="text-green-100">Resumen del día actual</p>
-                </div>
-                <div class="flex gap-8">
-                    <div class="text-center">
-                        <div class="text-4xl font-bold" th:text="${#lists.size(tareasHoy)}">0</div>
-                        <div class="text-green-100 text-sm">Actividades</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-4xl font-bold"
-                            th:text="${'$' + #numbers.formatDecimal(totalHoy, 0, 'COMMA', 0, 'POINT')}">$0</div>
-                        <div class="text-green-100 text-sm">Total del día</div>
-                    </div>
-                </div>
-            </div>
-            <div th:if="${!#lists.isEmpty(tareasHoy)}"
-                class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div th:each="tarea : ${tareasHoy}" class="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
-                    <div class="font-semibold" th:text="${tarea.empleado?.nombre ?: 'Sin asignar'}">Empleado</div>
-                    <div class="text-sm text-green-100"
-                        th:text="${(tarea.tipoTarea?.descripcion ?: 'N/A') + ' - ' + tarea.cantidad + ' ' + (tarea.tipoTarea?.unidadMedida?.nombre ?: '')}">
-                        Tarea</div>
-                </div>
-            </div>
-            <div th:if="${#lists.isEmpty(tareasHoy)}" class="mt-4 text-center text-green-100">
-                <p>No hay actividades registradas hoy. <a href="/tareas/registro"
-                        class="underline font-semibold">¿Registrar una?</a></p>
-            </div>
-        </div>
 
-        <!-- Charts Row 1 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Chart - Actividades por Mes -->
-            <div class="lg:col-span-2 card">
-                <div class="card-header">
-                    <div class="flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                            </path>
-                        </svg>
-                        <span>Actividades por Mes</span>
-                    </div>
-                </div>
-                <div class="p-6 h-80 relative">
-                    <canvas id="actividadesChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Pie Chart - Distribución por Tipo -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                        </svg>
-                        <span>Tipos de Tarea</span>
-                    </div>
-                </div>
-                <div class="p-6 h-80 relative">
-                    <canvas id="tiposChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row 2 & Info -->
+        <!-- Charts Row: Actividades & Info -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <!-- Top 5 Empleados -->
             <div class="card">
@@ -356,7 +278,6 @@
             </div>
         </div>
 
-        <!-- Navigation Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <a href="/clientes" class="card group hover:shadow-2xl">
                 <div class="p-8 text-center">
@@ -413,6 +334,7 @@
             const mesesCantidades = /*[[${mesesCantidades}]]*/[];
             const pieLabels = /*[[${pieLabels}]]*/[];
             const pieData = /*[[${pieData}]]*/[];
+            const tiposConPreciosDashboard = /*[[${tiposConPreciosDashboard}]]*/[];
 
             // Bar Chart
             const ctx = document.getElementById('actividadesChart');
@@ -448,18 +370,9 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
-                        },
+                        interaction: { mode: 'index', intersect: false },
                         plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    usePointStyle: true,
-                                    padding: 20
-                                }
-                            },
+                            legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } },
                             tooltip: {
                                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
                                 padding: 12,
@@ -467,9 +380,7 @@
                                 bodyFont: { size: 13 },
                                 callbacks: {
                                     label: function (context) {
-                                        if (context.datasetIndex === 0) {
-                                            return 'Monto: $' + context.raw.toLocaleString('es-AR');
-                                        }
+                                        if (context.datasetIndex === 0) return 'Monto: $' + context.raw.toLocaleString('es-AR');
                                         return 'Actividades: ' + context.raw;
                                     }
                                 }
@@ -477,34 +388,16 @@
                         },
                         scales: {
                             y: {
-                                type: 'linear',
-                                position: 'left',
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.05)'
-                                },
-                                ticks: {
-                                    callback: function (value) {
-                                        return '$' + value.toLocaleString('es-AR');
-                                    }
-                                }
+                                type: 'linear', position: 'left', beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { callback: function (v) { return '$' + v.toLocaleString('es-AR'); } }
                             },
                             y1: {
-                                type: 'linear',
-                                position: 'right',
-                                beginAtZero: true,
-                                grid: {
-                                    drawOnChartArea: false,
-                                },
-                                ticks: {
-                                    stepSize: 1
-                                }
+                                type: 'linear', position: 'right', beginAtZero: true,
+                                grid: { drawOnChartArea: false },
+                                ticks: { stepSize: 1 }
                             },
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
+                            x: { grid: { display: false } }
                         }
                     }
                 });
@@ -532,15 +425,118 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } }
+                    }
+                });
+            }
+
+
+            const COLORS = [
+                'rgba(34, 197, 94, 1)',
+                'rgba(59, 130, 246, 1)',
+                'rgba(168, 85, 247, 1)',
+                'rgba(234, 179, 8, 1)',
+                'rgba(239, 68, 68, 1)',
+                'rgba(20, 184, 166, 1)',
+                'rgba(249, 115, 22, 1)'
+            ];
+
+            let fluctuacionChartInstance = null;
+
+            function buildFluctuacionChart() {
+                const ctxFl = document.getElementById('fluctuacionChart');
+                if (!ctxFl) return;
+
+                const checkboxes = document.querySelectorAll('.tipo-checkbox:checked');
+                const selectedIds = Array.from(checkboxes).map(cb => String(cb.value));
+
+                // Collect all unique dates from selected tipos
+                const allDatesSet = new Set();
+                tiposConPreciosDashboard
+                    .filter(t => selectedIds.includes(String(t.id)))
+                    .forEach(t => t.precios.forEach(p => allDatesSet.add(p.fecha)));
+
+                const allDates = Array.from(allDatesSet).sort();
+
+                const datasets = tiposConPreciosDashboard
+                    .filter(t => selectedIds.includes(String(t.id)) && t.precios.length > 0)
+                    .map((t, idx) => {
+                        const precioMap = {};
+                        t.precios.forEach(p => precioMap[p.fecha] = p.valor);
+                        const color = COLORS[idx % COLORS.length];
+                        return {
+                            label: t.descripcion,
+                            data: allDates.map(d => precioMap[d] !== undefined ? precioMap[d] : null),
+                            borderColor: color,
+                            backgroundColor: color.replace('1)', '0.1)'),
+                            borderWidth: 2.5,
+                            pointBackgroundColor: color,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 9,
+                            fill: false,
+                            tension: 0.3,
+                            spanGaps: false
+                        };
+                    });
+
+                const labels = allDates.map(d => {
+                    const dt = new Date(d + 'T00:00:00');
+                    return dt.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: '2-digit' });
+                });
+
+                if (fluctuacionChartInstance) fluctuacionChartInstance.destroy();
+
+                const msg = document.getElementById('fluctuacionMsg');
+                if (datasets.length === 0 || allDates.length === 0) {
+                    ctxFl.style.display = 'none';
+                    if (msg) msg.classList.remove('hidden');
+                    return;
+                }
+                ctxFl.style.display = '';
+                if (msg) msg.classList.add('hidden');
+
+                fluctuacionChartInstance = new Chart(ctxFl.getContext('2d'), {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'nearest', intersect: true },
                         plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { usePointStyle: true }
+                            legend: { position: 'top', labels: { usePointStyle: true, padding: 15 } },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.85)',
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 13 },
+                                callbacks: {
+                                    title: function (ctx) { return 'Fecha: ' + ctx[0].label; },
+                                    label: function (ctx) {
+                                        return ' ' + ctx.dataset.label + ': $' +
+                                            ctx.raw.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                    }
+                                }
                             }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { callback: function (v) { return '$' + v.toLocaleString('es-AR'); } }
+                            },
+                            x: { grid: { display: false } }
                         }
                     }
                 });
             }
+
+            // Expose globally for checkbox onchange
+            window.updateFluctuacionChart = buildFluctuacionChart;
+
+            // Initial render
+            buildFluctuacionChart();
         });
     </script>
 </body>

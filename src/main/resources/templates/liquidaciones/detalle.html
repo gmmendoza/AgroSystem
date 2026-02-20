@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+
+<head>
+    <title>Detalle Liquidación</title>
+</head>
+
+<body>
+    <div layout:fragment="breadcrumbs">
+        <nav class="flex">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li><a href="/" class="text-sm text-gray-700 hover:text-green-600">🏠 Inicio</a></li>
+                <li><span class="text-gray-400 mx-2">/</span><a href="/liquidaciones"
+                        class="text-sm text-gray-500 hover:text-green-600">Liquidaciones</a></li>
+                <li><span class="text-gray-400 mx-2">/</span><span class="text-sm text-gray-500">Detalle</span></li>
+            </ol>
+        </nav>
+    </div>
+
+    <div layout:fragment="content">
+        <!-- Header con estado -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-1">
+                    <h1 class="text-2xl font-bold text-gray-800">Liquidación #<span th:text="${liquidacion.id}"></span>
+                    </h1>
+                    <span class="px-3 py-1 rounded-full text-sm font-bold" th:classappend="${liquidacion.estado.nombre == 'Pendiente' ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' :
+                                       liquidacion.estado.nombre == 'Aprobada' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
+                                       liquidacion.estado.nombre == 'Pagada' ? 'bg-green-100 text-green-700 border border-green-300' :
+                                       'bg-red-100 text-red-700 border border-red-300'}"
+                        th:text="${liquidacion.estado.nombre}">Estado</span>
+                </div>
+                <p class="text-gray-500" th:text="${liquidacion.empleado.nombre + ' — período: ' +
+                #temporals.format(liquidacion.periodoInicio, 'dd/MM/yyyy') + ' al ' +
+                #temporals.format(liquidacion.periodoFin, 'dd/MM/yyyy')}"></p>
+            </div>
+            <!-- Botones de flujo -->
+            <div class="flex gap-2 flex-wrap">
+                <form th:if="${liquidacion.estado.nombre == 'Pendiente'}" method="post"
+                    th:action="@{/liquidaciones/{id}/aprobar(id=${liquidacion.id})}">
+                    <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Aprobar
+                    </button>
+                </form>
+                <form th:if="${liquidacion.estado.nombre == 'Aprobada'}" method="post"
+                    th:action="@{/liquidaciones/{id}/pagar(id=${liquidacion.id})}">
+                    <input type="hidden" name="fechaPago"
+                        th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                    <button type="submit"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Registrar Pago
+                    </button>
+                </form>
+                <form th:if="${liquidacion.estado.nombre == 'Pendiente' or liquidacion.estado.nombre == 'Aprobada'}"
+                    method="post" th:action="@{/liquidaciones/{id}/cancelar(id=${liquidacion.id})}"
+                    onsubmit="return confirm('¿Cancelar esta liquidación?')">
+                    <button type="submit" class="bg-red-400 hover:bg-red-500 text-white font-bold py-2 px-4 rounded">
+                        Cancelar
+                    </button>
+                </form>
+                <a href="/liquidaciones"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded">← Volver</a>
+            </div>
+        </div>
+
+        <!-- Cards resumen -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-xs text-gray-500 uppercase">Total Bruto</p>
+                <p class="text-xl font-bold text-gray-800"
+                    th:text="${'$' + #numbers.formatDecimal(liquidacion.totalBruto, 0, 'COMMA', 2, 'POINT')}"></p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-xs text-gray-500 uppercase">Deducciones</p>
+                <p class="text-xl font-bold text-red-500"
+                    th:text="${'-$' + #numbers.formatDecimal(liquidacion.deducciones, 0, 'COMMA', 2, 'POINT')}"></p>
+            </div>
+            <div class="bg-green-50 border border-green-200 rounded-lg shadow p-4">
+                <p class="text-xs text-green-600 uppercase font-semibold">Total Neto</p>
+                <p class="text-2xl font-bold text-green-700"
+                    th:text="${'$' + #numbers.formatDecimal(liquidacion.totalNeto, 0, 'COMMA', 2, 'POINT')}"></p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <p class="text-xs text-gray-500 uppercase">Actividades</p>
+                <p class="text-xl font-bold text-gray-800" th:text="${#lists.size(detalle)}"></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Tabla de tareas -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
+                <div
+                    class="bg-gradient-to-r from-green-700 to-green-800 text-white px-5 py-3 flex justify-between items-center">
+                    <span class="font-bold">Detalle de Actividades</span>
+                    <span class="text-sm text-green-200" th:text="${#lists.size(detalle) + ' registros'}"></span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                            <tr>
+                                <th class="py-2 px-4 text-left">Fecha</th>
+                                <th class="py-2 px-4 text-left">Tipo de Tarea</th>
+                                <th class="py-2 px-4 text-right">Cantidad</th>
+                                <th class="py-2 px-4 text-right">Precio</th>
+                                <th class="py-2 px-4 text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr th:each="t : ${detalle}" class="hover:bg-gray-50">
+                                <td class="py-2 px-4 text-gray-600"
+                                    th:text="${#temporals.format(t.fecha, 'dd/MM/yyyy')}"></td>
+                                <td class="py-2 px-4 font-medium text-gray-800" th:text="${t.tipoTarea.descripcion}">
+                                </td>
+                                <td class="py-2 px-4 text-right"
+                                    th:text="${t.cantidad + ' ' + t.tipoTarea.unidadMedida.nombre}"></td>
+                                <td class="py-2 px-4 text-right text-gray-500"
+                                    th:text="${'$' + #numbers.formatDecimal(t.precioAplicado, 0, 'COMMA', 2, 'POINT')}">
+                                </td>
+                                <td class="py-2 px-4 text-right font-semibold text-green-700"
+                                    th:text="${'$' + #numbers.formatDecimal(t.cantidad * t.precioAplicado, 0, 'COMMA', 2, 'POINT')}">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Panel lateral -->
+            <div class="flex flex-col gap-4">
+                <!-- Resumen por tipo -->
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="font-bold text-gray-700 mb-3">Por Tipo de Tarea</h3>
+                    <div th:each="entry : ${resumenPorTipo}"
+                        class="flex justify-between items-center py-1 border-b border-gray-100">
+                        <span class="text-sm text-gray-600" th:text="${entry.key}"></span>
+                        <span class="text-sm font-semibold text-green-700"
+                            th:text="${'$' + #numbers.formatDecimal(entry.value, 0, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                </div>
+
+                <!-- Deducciones (editable si no está pagada/cancelada) -->
+                <div class="bg-white rounded-lg shadow-md p-4"
+                    th:if="${liquidacion.estado.nombre == 'Pendiente' or liquidacion.estado.nombre == 'Aprobada'}">
+                    <h3 class="font-bold text-gray-700 mb-3">Ajustar Deducciones</h3>
+                    <form th:action="@{/liquidaciones/{id}/deducciones(id=${liquidacion.id})}" method="post">
+                        <div class="mb-3">
+                            <label class="text-xs font-semibold text-gray-500">Monto a deducir ($)</label>
+                            <input type="number" name="deducciones" step="0.01" min="0"
+                                th:value="${liquidacion.deducciones}"
+                                class="w-full mt-1 border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-green-400">
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-xs font-semibold text-gray-500">Observaciones</label>
+                            <textarea name="observaciones" rows="2"
+                                class="w-full mt-1 border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-green-400"
+                                th:text="${liquidacion.observaciones}"></textarea>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 rounded text-sm">
+                            Actualizar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="bg-gray-50 rounded-lg p-4 text-sm"
+                    th:if="${liquidacion.observaciones != null and !liquidacion.observaciones.isBlank()}">
+                    <p class="font-semibold text-gray-600 mb-1">Observaciones</p>
+                    <p class="text-gray-500" th:text="${liquidacion.observaciones}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

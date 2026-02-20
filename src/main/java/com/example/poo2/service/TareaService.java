@@ -30,8 +30,16 @@ public class TareaService {
         return tipoTareaRepository.findAll();
     }
 
+    public Optional<TipoTarea> findTipoById(Long id) {
+        return tipoTareaRepository.findById(id);
+    }
+
     public TipoTarea saveTipo(TipoTarea tipoTarea) {
         return tipoTareaRepository.save(tipoTarea);
+    }
+
+    public void deleteTipo(Long id) {
+        tipoTareaRepository.deleteById(id);
     }
 
     // PrecioTarea methods

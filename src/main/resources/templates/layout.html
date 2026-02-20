@@ -15,7 +15,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Chart.js (para dashboard) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Flatpickr (Global) -->
@@ -40,7 +40,6 @@
     </script>
 
     <style>
-        /* Toast Animations */
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -70,141 +69,208 @@
         .toast-exit {
             animation: fadeOut 0.3s ease-in forwards;
         }
+
+        /* Sidebar active link */
+        .sidebar-link.active {
+            background-color: rgba(34, 197, 94, 0.25);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .sidebar-link.active svg {
+            color: #4ade80;
+        }
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen">
 
-    <!-- Enhanced Navigation -->
-    <nav class="bg-gradient-to-r from-green-600 to-green-700 shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <div class="flex items-center space-x-3">
-                    <a href="/" class="flex items-center space-x-2">
-                        <div class="bg-white/20 p-2 rounded-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                </path>
-                            </svg>
-                        </div>
-                        <span class="text-white font-bold text-xl hidden sm:block">AgroSystem</span>
-                    </a>
+    <!-- ===== TOP NAVBAR (slim: logo + hamburg + user + logout) ===== -->
+    <header
+        class="fixed top-0 left-0 right-0 z-40 h-16 bg-gradient-to-r from-green-700 to-green-600 shadow-md flex items-center px-4 gap-4">
+
+        <!-- Hamburger toggle -->
+        <button id="sidebarToggle"
+            class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition text-white"
+            aria-label="Toggle sidebar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 text-white">
+            <div class="bg-white/20 p-1.5 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <span class="font-bold text-lg hidden sm:block">AgroSystem</span>
+        </a>
+
+        <div class="flex-1"></div>
+
+        <!-- User + Logout -->
+        <div sec:authorize="isAuthenticated()" class="flex items-center gap-3">
+            <a href="/perfil"
+                class="hidden sm:flex items-center gap-2 bg-white/10 hover:bg-white/20 transition rounded-lg px-3 py-1.5">
+                <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                 </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden md:flex items-center space-x-1">
-                    <a href="/"
-                        class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-all duration-300 flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-                            </path>
-                        </svg>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="/clientes"
-                        class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-all duration-300 flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
-                        <span>Clientes</span>
-                    </a>
-                    <a href="/empleados"
-                        class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-all duration-300 flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                            </path>
-                        </svg>
-                        <span>Empleados</span>
-                    </a>
-                    <a href="/actividades"
-                        class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-all duration-300 flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                            </path>
-                        </svg>
-                        <span>Actividades y Tareas</span>
-                    </a>
-                    <a href="/docs"
-                        class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-all duration-300 flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                            </path>
-                        </svg>
-                        <span>Docs</span>
-                    </a>
+                <div class="text-white leading-tight">
+                    <p class="text-sm font-semibold" sec:authentication="name">Usuario</p>
+                    <p class="text-xs text-green-200" sec:authentication="principal.authorities">Rol</p>
                 </div>
+            </a>
+            <form th:action="@{/logout}" method="post" class="inline">
+                <button type="submit"
+                    class="flex items-center gap-1 bg-red-500/20 hover:bg-red-500/40 border border-red-400/30 hover:border-red-400/60 text-white px-3 py-1.5 rounded-lg transition text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="hidden sm:inline">Salir</span>
+                </button>
+            </form>
+        </div>
+    </header>
 
-                <!-- User Menu -->
-                <div class="flex items-center space-x-4">
-                    <!-- User Info (clickable to profile) -->
-                    <div sec:authorize="isAuthenticated()" class="flex items-center space-x-3">
-                        <a href="/perfil"
-                            class="hidden sm:flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1.5 hover:bg-white/20 transition-all">
-                            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-white">
-                                <p class="text-sm font-semibold" sec:authentication="name">Usuario</p>
-                                <p class="text-xs text-green-200" sec:authentication="principal.authorities">Rol</p>
-                            </div>
-                        </a>
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar"
+        class="fixed top-16 left-0 bottom-0 z-30 w-60 flex flex-col overflow-y-auto transition-transform duration-300"
+        style="background-color:#0f2218; transform: translateX(0);">
 
-                        <!-- Logout Button -->
-                        <form th:action="@{/logout}" method="post" class="inline">
-                            <button type="submit"
-                                class="flex items-center space-x-2 bg-red-500/20 hover:bg-red-500/40 text-white px-4 py-2 rounded-lg transition-all duration-300 border border-red-400/30 hover:border-red-400/50">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                                    </path>
-                                </svg>
-                                <span class="hidden sm:inline">Salir</span>
-                            </button>
-                        </form>
-                    </div>
+        <nav class="flex-1 px-3 py-4 space-y-0.5">
+
+            <!-- Dashboard -->
+            <a href="/"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="text-sm">Dashboard</span>
+            </a>
+
+            <!-- Section: Gestión -->
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 pt-4 pb-1">Gestión</p>
+
+            <a href="/clientes"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/clientes">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span class="text-sm">Clientes</span>
+            </a>
+
+            <a href="/empleados"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/empleados">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span class="text-sm">Empleados</span>
+            </a>
+
+            <a href="/actividades"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/actividades">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span class="text-sm">Actividades y Tareas</span>
+            </a>
+
+            <!-- Section: Finanzas -->
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 pt-4 pb-1">Finanzas</p>
+
+            <a href="/liquidaciones"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/liquidaciones">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                </svg>
+                <span class="text-sm">Liquidaciones</span>
+            </a>
+
+            <a href="/cuentas-corrientes"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/cuentas-corrientes">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <span class="text-sm">Cuentas Corrientes</span>
+            </a>
+
+            <!-- Section: Infraestructura -->
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 pt-4 pb-1">Infraestructura</p>
+
+            <a href="/almacenes"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/almacenes">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                </svg>
+                <span class="text-sm">Almacenes</span>
+            </a>
+
+            <!-- Section: Sistema -->
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 pt-4 pb-1">Sistema</p>
+
+            <a href="/docs"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-green-600/30 hover:text-white text-gray-200"
+                data-path="/docs">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span class="text-sm">Documentación</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar footer -->
+        <div class="px-3 py-3 border-t border-green-900/60 text-xs text-gray-500 text-center">
+            © 2026 AgroSystem
+        </div>
+    </aside>
+
+    <!-- Overlay (mobile) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-20 hidden"></div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div id="mainContent" class="transition-all duration-300" style="margin-top:4rem; margin-left:15rem;">
+        <main class="min-h-[calc(100vh-4rem)]">
+            <div class="px-6 py-6">
+                <div layout:fragment="breadcrumbs" class="mb-5"></div>
+                <div layout:fragment="content" class="fade-in">
+                    <!-- Content goes here -->
                 </div>
             </div>
-        </div>
-    </nav>
-
-    <!-- Main Content (flex-grow para sticky footer) -->
-    <main class="flex-grow">
-        <div class="container mx-auto px-4 py-8">
-            <!-- Breadcrumbs Placeholder -->
-            <div layout:fragment="breadcrumbs" class="mb-6"></div>
-
-            <div layout:fragment="content" class="fade-in">
-                <!-- Content goes here -->
+        </main>
+        <footer class="bg-white border-t border-gray-200">
+            <div class="px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-gray-500 text-xs">
+                <p>© 2026 AgroSystem - Sistema de Gestión Agrícola</p>
+                <p>Desarrollado por <span class="font-semibold text-green-600">Guadalupe Mendoza</span></p>
             </div>
-        </div>
-    </main>
-
-    <!-- Footer (sticky al fondo) -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex flex-col md:flex-row items-center justify-between text-gray-600 text-sm">
-                <p>&copy; 2026 AgroSystem - Sistema de Gestión Agrícola</p>
-                <p class="mt-2 md:mt-0">Desarrollado por <span class="font-semibold text-green-600">Guadalupe
-                        Mendoza</span></p>
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2"></div>
 
-    <!-- Modal de Confirmación (Reutilizable) -->
+    <!-- Modal de Confirmación -->
     <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all scale-95 opacity-0"
             id="confirmModalContent">
@@ -236,19 +302,54 @@
     <!-- Custom JavaScript -->
     <script th:src="@{/js/app.js}"></script>
 
-    <!-- Toast & Loading Logic -->
     <script>
-        // Toast Function
+        // ===== Sidebar toggle =====
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        let sidebarOpen = true;
+
+        function setSidebar(open) {
+            sidebarOpen = open;
+            if (open) {
+                sidebar.style.transform = 'translateX(0)';
+                mainContent.style.marginLeft = '15rem';
+                overlay.classList.add('hidden');
+            } else {
+                sidebar.style.transform = 'translateX(-100%)';
+                mainContent.style.marginLeft = '0';
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            setSidebar(!sidebarOpen);
+            if (!sidebarOpen && window.innerWidth < 1024) {
+                overlay.classList.remove('hidden');
+            }
+        });
+        overlay.addEventListener('click', () => {
+            setSidebar(false);
+            overlay.classList.add('hidden');
+        });
+
+        // On mobile start closed
+        if (window.innerWidth < 1024) setSidebar(false);
+
+        // Active link highlighting
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            const path = link.getAttribute('data-path');
+            if (path === '/' ? currentPath === '/' : currentPath.startsWith(path)) {
+                link.classList.add('active');
+            }
+        });
+
+        // ===== Toast =====
         function showToast(type, message) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-
-            // Colors and Icons based on type
-            let bgColor = 'bg-white';
-            let textColor = 'text-gray-800';
-            let icon = '';
-            let borderClass = '';
-
+            let icon = '', borderClass = '';
             if (type === 'success') {
                 borderClass = 'border-l-4 border-green-500';
                 icon = `<svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
@@ -259,20 +360,14 @@
                 borderClass = 'border-l-4 border-blue-500';
                 icon = `<svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
             }
-
-            toast.className = `toast-enter flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white rounded-lg shadow-lg ${borderClass}`;
+            toast.className = `toast-enter flex items-center w-full max-w-xs p-4 space-x-4 bg-white rounded-lg shadow-lg ${borderClass}`;
             toast.innerHTML = `
                 ${icon}
                 <div class="pl-2 text-sm font-normal text-gray-800">${message}</div>
-                <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close" onclick="this.parentElement.remove()">
-                    <span class="sr-only">Close</span>
+                <button type="button" class="ml-auto text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" onclick="this.parentElement.remove()">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            `;
-
+                </button>`;
             container.appendChild(toast);
-
-            // Auto remove after 5 seconds
             setTimeout(() => {
                 toast.classList.remove('toast-enter');
                 toast.classList.add('toast-exit');
@@ -280,91 +375,47 @@
             }, 5000);
         }
 
-        // Loading State for Forms
+        // ===== Form loading state =====
         document.addEventListener('submit', function (e) {
             const form = e.target;
-            // Skip if form has 'no-loading' class
             if (form.classList.contains('no-loading')) return;
-
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
-                // Check if form is valid (HTML5 validation)
                 if (!form.checkValidity()) return;
-
-                const originalContent = submitBtn.innerHTML;
-                const originalWidth = submitBtn.offsetWidth;
-
-                submitBtn.style.width = `${originalWidth}px`; // Prevent resizing
+                submitBtn.style.width = `${submitBtn.offsetWidth}px`;
                 submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
-
-                submitBtn.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Procesando...
-                `;
+                submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Procesando...`;
             }
         });
 
-        // Modal Logic (Existing)
+        // ===== Modal =====
         let confirmCallback = null;
-
         function showConfirmModal(title, message, buttonText, callback) {
             const modal = document.getElementById('confirmModal');
             const content = document.getElementById('confirmModalContent');
-
             document.getElementById('confirmModalTitle').textContent = title || '¿Confirmar acción?';
             document.getElementById('confirmModalMessage').textContent = message || 'Esta acción no se puede deshacer.';
             document.getElementById('confirmModalButton').textContent = buttonText || 'Eliminar';
-
             confirmCallback = callback;
-
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
+            setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
         }
-
         function closeConfirmModal() {
             const modal = document.getElementById('confirmModal');
             const content = document.getElementById('confirmModalContent');
-
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
-
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                confirmCallback = null;
-            }, 200);
+            setTimeout(() => { modal.classList.add('hidden'); confirmCallback = null; }, 200);
         }
-
         document.getElementById('confirmModalButton').addEventListener('click', function () {
-            if (confirmCallback) {
-                confirmCallback();
-            }
+            if (confirmCallback) confirmCallback();
             closeConfirmModal();
         });
-
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeConfirmModal();
-        });
-
-        document.getElementById('confirmModal').addEventListener('click', function (e) {
-            if (e.target === this) closeConfirmModal();
-        });
-
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeConfirmModal(); });
+        document.getElementById('confirmModal').addEventListener('click', function (e) { if (e.target === this) closeConfirmModal(); });
         function confirmDelete(url, itemName) {
-            showConfirmModal(
-                '¿Eliminar ' + itemName + '?',
-                'Esta acción eliminará permanentemente este registro.',
-                'Sí, eliminar',
-                function () {
-                    window.location.href = url;
-                }
-            );
+            showConfirmModal('¿Eliminar ' + itemName + '?', 'Esta acción eliminará permanentemente este registro.', 'Sí, eliminar', () => { window.location.href = url; });
         }
     </script>
 

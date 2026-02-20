@@ -36,6 +36,8 @@ public class DocsController {
         model.addAttribute("dpIteracion1", leerArchivo("docs/dp-iteracion-1.md"));
         model.addAttribute("retrospectiva", leerArchivo("docs/retrospectiva-iteracion-1.md"));
         model.addAttribute("roadmap", leerArchivo("docs/roadmap.md"));
+        model.addAttribute("dpIteracion2", leerArchivo("docs/dp-iteracion-2.md"));
+        model.addAttribute("retrospectiva2", leerArchivo("docs/retrospectiva-iteracion-2.md"));
 
         return "documentacion/index";
     }
