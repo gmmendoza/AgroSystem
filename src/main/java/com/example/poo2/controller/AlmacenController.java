@@ -39,7 +39,7 @@ public class AlmacenController {
     }
 
     @GetMapping("/editar/{id}")
-    public String formularioEditar(@PathVariable Long id, Model model) {
+    public String formularioEditar(@PathVariable("id") Long id, Model model) {
         almacenService.findById(id).ifPresent(a -> model.addAttribute("almacen", a));
         model.addAttribute("editando", true);
         return "almacenes/form";
@@ -58,7 +58,7 @@ public class AlmacenController {
     }
 
     @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String eliminar(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             almacenService.delete(id);
             redirectAttributes.addFlashAttribute("success", "Almacén eliminado.");
@@ -69,7 +69,7 @@ public class AlmacenController {
     }
 
     @GetMapping("/{id}")
-    public String detalle(@PathVariable Long id, Model model) {
+    public String detalle(@PathVariable("id") Long id, Model model) {
         almacenService.findById(id).ifPresent(a -> model.addAttribute("almacen", a));
         return "almacenes/detalle";
     }

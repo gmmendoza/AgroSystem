@@ -49,11 +49,12 @@ public class TareaController {
         model.addAttribute("preciosVigentes", preciosVigentes);
         model.addAttribute("tipoTarea", new TipoTarea());
         model.addAttribute("unidadesMedida", unidadMedidaRepository.findAll());
+        model.addAttribute("editando", false);
         return "tareas/tipos";
     }
 
     @GetMapping("/tipos/editar/{id}")
-    public String editarTipo(@PathVariable Long id, Model model) {
+    public String editarTipo(@PathVariable("id") Long id, Model model) {
         tareaService.findTipoById(id).ifPresent(tipo -> model.addAttribute("tipoTarea", tipo));
         model.addAttribute("tipos", tareaService.findAllTipos());
         Map<Long, Double> preciosVigentes = new HashMap<>();
@@ -70,7 +71,7 @@ public class TareaController {
 
     @PostMapping("/tipos/guardar")
     public String saveTipo(@ModelAttribute TipoTarea tipoTarea,
-            @RequestParam(required = false) Long unidadMedidaId,
+            @RequestParam(name = "unidadMedidaId", required = false) Long unidadMedidaId,
             RedirectAttributes redirectAttributes) {
         if (unidadMedidaId != null) {
             UnidadMedida um = new UnidadMedida();
@@ -85,7 +86,7 @@ public class TareaController {
     }
 
     @GetMapping("/tipos/eliminar/{id}")
-    public String eliminarTipo(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String eliminarTipo(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             tareaService.deleteTipo(id);
             redirectAttributes.addFlashAttribute("success", "Tipo de tarea eliminado correctamente.");
@@ -99,7 +100,7 @@ public class TareaController {
     // --- Precios ---
 
     @GetMapping("/precios")
-    public String listPrecios(@RequestParam(required = false) Long tipoId, Model model) {
+    public String listPrecios(@RequestParam(name = "tipoId", required = false) Long tipoId, Model model) {
         List<TipoTarea> tipos = tareaService.findAllTipos();
         model.addAttribute("tipos", tipos);
         model.addAttribute("tipoId", tipoId);
@@ -149,9 +150,9 @@ public class TareaController {
     }
 
     @PostMapping("/precios/guardar")
-    public String savePrecio(@RequestParam Long tipoTareaId,
-            @RequestParam Double valor,
-            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaVigencia,
+    public String savePrecio(@RequestParam("tipoTareaId") Long tipoTareaId,
+            @RequestParam("valor") Double valor,
+            @RequestParam("fechaVigencia") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaVigencia,
             RedirectAttributes redirectAttributes) {
         try {
             PrecioTarea precioTarea = new PrecioTarea();
@@ -180,7 +181,7 @@ public class TareaController {
 
     @PostMapping("/registro/guardar")
     public String saveRegistro(@ModelAttribute TareaRealizada tareaRealizada,
-            @RequestParam(value = "empleadoIds", required = false) List<Long> empleadoIds,
+            @RequestParam(name = "empleadoIds", required = false) List<Long> empleadoIds,
             RedirectAttributes redirectAttributes) {
         try {
             if (tareaRealizada.getFecha() == null) {
@@ -214,10 +215,10 @@ public class TareaController {
 
     @GetMapping("/historial")
     public String listHistorial(
-            @RequestParam(required = false) Long empleadoId,
-            @RequestParam(required = false) Long tipoTareaId,
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(name = "empleadoId", required = false) Long empleadoId,
+            @RequestParam(name = "tipoTareaId", required = false) Long tipoTareaId,
+            @RequestParam(name = "fechaInicio", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(name = "fechaFin", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate fechaFin,
             Model model) {
 
         model.addAttribute("tareas", tareaService.filtrarTareas(empleadoId, tipoTareaId, fechaInicio, fechaFin));
@@ -235,7 +236,7 @@ public class TareaController {
     // --- Editar Actividad ---
 
     @GetMapping("/editar/{id}")
-    public String editarActividad(@PathVariable Long id, Model model) {
+    public String editarActividad(@PathVariable("id") Long id, Model model) {
         tareaService.findRealizadaById(id).ifPresent(tarea -> {
             model.addAttribute("tareaRealizada", tarea);
         });
@@ -254,13 +255,13 @@ public class TareaController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al actualizar: " + e.getMessage());
         }
-        return "redirect:/tareas/historial";
+        return "redirect:/actividades";
     }
 
     // --- Eliminar Actividad ---
 
     @GetMapping("/eliminar/{id}")
-    public String eliminarActividad(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String eliminarActividad(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             tareaService.eliminarTarea(id);
             redirectAttributes.addFlashAttribute("success", "Actividad eliminada correctamente.");
@@ -274,7 +275,7 @@ public class TareaController {
 
     @GetMapping("/api/precios/{id}")
     @ResponseBody
-    public List<Map<String, Object>> getPreciosPorTipo(@PathVariable Long id) {
+    public List<Map<String, Object>> getPreciosPorTipo(@PathVariable("id") Long id) {
         TipoTarea tipo = new TipoTarea();
         tipo.setId(id);
         return tareaService.findPreciosByTipo(tipo).stream()
@@ -291,7 +292,7 @@ public class TareaController {
 
     @GetMapping("/api/check-precio")
     @ResponseBody
-    public Map<String, Object> checkPrecio(@RequestParam Long tipoId, @RequestParam String fecha) {
+    public Map<String, Object> checkPrecio(@RequestParam("tipoId") Long tipoId, @RequestParam("fecha") String fecha) {
         Map<String, Object> response = new HashMap<>();
         try {
             TipoTarea tipo = new TipoTarea();

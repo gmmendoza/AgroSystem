@@ -30,7 +30,7 @@ public class LiquidacionController {
 
     @GetMapping
     public String list(@RequestParam(required = false) String estado,
-            @RequestParam(required = false) Long empleadoId,
+            @RequestParam(name = "empleadoId", required = false) Long empleadoId,
             Model model) {
         List<Liquidacion> liquidaciones;
 
@@ -76,9 +76,9 @@ public class LiquidacionController {
 
     @PostMapping("/generar")
     public String generar(
-            @RequestParam Long empleadoId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
+            @RequestParam(name = "empleadoId") Long empleadoId,
+            @RequestParam(name = "inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(name = "fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
             RedirectAttributes redirectAttributes) {
         try {
             Liquidacion liq = liquidacionService.generarLiquidacion(empleadoId, inicio, fin);
@@ -92,7 +92,7 @@ public class LiquidacionController {
     }
 
     @GetMapping("/{id}")
-    public String detalle(@PathVariable Long id, Model model) {
+    public String detalle(@PathVariable("id") Long id, Model model) {
         Liquidacion liq = liquidacionService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Liquidación no encontrada"));
 
@@ -112,7 +112,7 @@ public class LiquidacionController {
     }
 
     @PostMapping("/{id}/aprobar")
-    public String aprobar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String aprobar(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             liquidacionService.aprobar(id);
             redirectAttributes.addFlashAttribute("success", "Liquidación aprobada correctamente.");
@@ -123,7 +123,7 @@ public class LiquidacionController {
     }
 
     @PostMapping("/{id}/pagar")
-    public String pagar(@PathVariable Long id,
+    public String pagar(@PathVariable("id") Long id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaPago,
             RedirectAttributes redirectAttributes) {
         try {
@@ -136,7 +136,7 @@ public class LiquidacionController {
     }
 
     @PostMapping("/{id}/cancelar")
-    public String cancelar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String cancelar(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             liquidacionService.cancelar(id);
             redirectAttributes.addFlashAttribute("info", "Liquidación cancelada.");
@@ -147,8 +147,8 @@ public class LiquidacionController {
     }
 
     @PostMapping("/{id}/deducciones")
-    public String actualizarDeducciones(@PathVariable Long id,
-            @RequestParam Double deducciones,
+    public String actualizarDeducciones(@PathVariable("id") Long id,
+            @RequestParam("deducciones") Double deducciones,
             @RequestParam(required = false) String observaciones,
             RedirectAttributes redirectAttributes) {
         try {
@@ -164,9 +164,9 @@ public class LiquidacionController {
     @GetMapping("/api/preview")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> preview(
-            @RequestParam Long empleadoId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
+            @RequestParam(name = "empleadoId") Long empleadoId,
+            @RequestParam(name = "inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(name = "fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
         try {
             List<TareaRealizada> tareas = liquidacionService.previewLiquidacion(empleadoId, inicio, fin);
             double total = tareas.stream()

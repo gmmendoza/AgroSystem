@@ -43,7 +43,7 @@
                         <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
                             <h4 class="text-sm font-bold text-blue-800 mb-3">Definir Nuevo Precio Vigente</h4>
                             <form @submit.prevent="submitPrecio()" class="flex flex-wrap gap-4 items-end">
-                                <input type="hidden" name="tipoTarea.id" :value="tipoId">
+                                <input type="hidden" name="tipoTareaId" :value="tipoId">
                                 <div class="flex-1 min-w-[150px]">
                                     <label class="block text-xs font-semibold text-gray-600 mb-1">Precio Unitario
                                         ($)</label>
@@ -212,7 +212,7 @@
                         // Or I can post Form Data to `/tareas/precios/guardar` and prevent redirect.
 
                         const formData = new FormData();
-                        formData.append('tipoTarea.id', this.tipoId);
+                        formData.append('tipoTareaId', this.tipoId);
                         formData.append('valor', this.formData.valor);
                         formData.append('fechaVigencia', this.formData.fechaVigencia);
 

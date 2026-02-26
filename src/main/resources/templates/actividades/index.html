@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
 
-</head>
-
 <head>
     <title>Actividades y Tareas</title>
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,7 +20,8 @@
 </head>
 
 <body>
-    <div layout:fragment="content" x-data="{ activeTab: 'historial' }">
+    <div layout:fragment="content" x-data="{ activeTab: 'historial' }"
+        x-init="$watch('activeTab', v => { if(v === 'config') { setTimeout(() => { if(typeof handleConfigTabVisible === 'function') handleConfigTabVisible(); }, 100); } })">
 
         <!-- Header & Add Button -->
         <div class="flex justify-between items-center mb-6">
@@ -149,7 +146,15 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600"
                                 th:text="${'$ ' + #numbers.formatDecimal(t.cantidad * t.precioAplicado, 1, 2)}"></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-1">
+                                <button
+                                    th:attr="onclick=|window.dispatchEvent(new CustomEvent('open-edit-modal', { detail: { id: ${t.id}, empleadoId: ${t.empleado.id}, tipoTareaId: ${t.tipoTarea.id}, fecha: '${t.fecha}', cantidad: ${t.cantidad} } }))|"
+                                    class="text-blue-500 hover:text-blue-700 transition p-2" title="Editar actividad">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
                                 <a th:href="@{'/tareas/eliminar/' + ${t.id}}"
                                     onclick="return confirm('¿Seguro que deseas eliminar?');"
                                     class="text-red-500 hover:text-red-700 transition p-2">
@@ -237,7 +242,7 @@
                                 <!-- Checkbox + nombre -->
                                 <label class="flex items-center gap-2.5 flex-1 cursor-pointer min-w-0">
                                     <input type="checkbox" class="tipo-checkbox w-4 h-4 accent-green-600 rounded"
-                                        th:data-id="${tipo.id}" th:data-nombre="${tipo.descripcion}">
+                                        th:data-id="${tipo.id}" th:data-nombre="${tipo.descripcion}" checked>
                                     <div class="min-w-0">
                                         <p class="text-sm font-semibold text-gray-800 truncate"
                                             th:text="${tipo.descripcion}"></p>
@@ -339,217 +344,243 @@
         <div th:replace="~{actividades/components/modal-nuevo-tipo :: modal}"></div>
         <div th:replace="~{actividades/components/modal-precios :: modal}"></div>
 
-    </div>
+        <script th:inline="javascript">
+            console.log('--- SCRIPT Actividades Initializing ---');
+            // ===== Fluctuación de Precios Chart =====
+            const configPalette = ['#16a34a', '#2563eb', '#dc2626', '#d97706', '#7c3aed', '#0891b2', '#be185d', '#65a30d', '#ea580c', '#6d28d9'];
 
-    <!-- Safe data transfer: avoids th:inline=javascript encoding issues with special chars -->
-    <script type="application/json" id="tiposData" th:inline="text">[[${tiposConPrecios}]]</script>
+            let configChart = null;
+            const selectedConfigTipos = new Set();
+            const tiposDataCache = {};
 
-    <script>
-        // ===== Load data safely from JSON tag =====
-        let tiposConPreciosConfig = [];
-        try {
-            tiposConPreciosConfig = JSON.parse(document.getElementById('tiposData').textContent);
-        } catch (e) { console.error('Error parsing tiposData:', e); }
+            // Inyectar datos iniciales desde Thymeleaf (Javascript Inlining)
+            const serverTiposData = /*[[${tiposConPrecios}]]*/[];
+            console.log('Price fluctuation data from server:', serverTiposData);
 
-        // Palette for multi-line chart
-        const configPalette = ['#16a34a', '#2563eb', '#dc2626', '#d97706', '#7c3aed', '#0891b2', '#be185d', '#65a30d', '#ea580c', '#6d28d9'];
-
-        let configChart = null;
-        // Use STRING keys to match data-id attributes exactly
-        const selectedConfigTipos = new Set();
-
-        // ===== Toggle all checkboxes =====
-        function toggleAllTipos(select) {
-            document.querySelectorAll('.tipo-checkbox').forEach(function (cb) {
-                cb.checked = select;
-                var id = cb.getAttribute('data-id');
-                if (select) selectedConfigTipos.add(id);
-                else selectedConfigTipos.delete(id);
-            });
-            renderConfigChart();
-        }
-
-        // ===== Delete confirmation =====
-        function confirmDeleteTipoInline(el) {
-            var url = el.getAttribute('data-url');
-            var nombre = el.getAttribute('data-nombre');
-            if (typeof showConfirmModal === 'function') {
-                showConfirmModal('¿Eliminar tipo de tarea?',
-                    'Se eliminará el tipo "' + nombre + '". Esta acción no se puede deshacer.',
-                    'Sí, eliminar', function () { window.location.href = url; });
-            } else {
-                if (confirm('¿Eliminar "' + nombre + '"?')) window.location.href = url;
-            }
-        }
-
-        // Keep for tipos.html compatibility
-        function confirmDeleteTipo(el) { confirmDeleteTipoInline(el); }
-
-        // ===== Build and render chart =====
-        function renderConfigChart() {
-            var noData = document.getElementById('configNoData');
-            var chartContainer = document.getElementById('configChartContainer');
-            if (!noData || !chartContainer) return;
-
-            // Filter only tipos that are checked AND have price data
-            var active = tiposConPreciosConfig.filter(function (t) {
-                return selectedConfigTipos.has(String(t.id)) && t.precios && t.precios.length > 0;
-            });
-
-            if (active.length === 0) {
-                chartContainer.classList.add('hidden');
-                noData.classList.remove('hidden');
-                if (configChart) { configChart.destroy(); configChart = null; }
-                return;
-            }
-
-            chartContainer.classList.remove('hidden');
-            noData.classList.add('hidden');
-
-            // Union of all dates across selected tipos, sorted
-            var allDatesSet = new Set();
-            active.forEach(function (t) { t.precios.forEach(function (p) { allDatesSet.add(p.fecha); }); });
-            var allDates = Array.from(allDatesSet).sort();
-            var labels = allDates.map(function (d) {
-                return new Date(d + 'T00:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: '2-digit' });
-            });
-
-            var datasets = active.map(function (t) {
-                var origIdx = tiposConPreciosConfig.findIndex(function (x) { return String(x.id) === String(t.id); });
-                var color = configPalette[origIdx % configPalette.length];
-                var byDate = {};
-                t.precios.forEach(function (p) { byDate[p.fecha] = p.valor; });
-                return {
-                    label: t.descripcion,
-                    data: allDates.map(function (d) { return byDate[d] !== undefined ? byDate[d] : null; }),
-                    borderColor: color,
-                    backgroundColor: color + '18',
-                    pointBackgroundColor: color,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    borderWidth: 2.5,
-                    fill: false,
-                    tension: 0.3,
-                    spanGaps: true
-                };
-            });
-
-            if (configChart) { configChart.destroy(); configChart = null; }
-            var canvas = document.getElementById('configPriceChart');
-            if (!canvas) return;
-            configChart = new Chart(canvas.getContext('2d'), {
-                type: 'line',
-                data: { labels: labels, datasets: datasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: {
-                            display: active.length > 1,
-                            position: 'top',
-                            labels: { usePointStyle: true, padding: 14, font: { size: 11 } }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(17,24,39,0.92)',
-                            padding: 10,
-                            callbacks: {
-                                title: function (ctx) { return 'Fecha: ' + ctx[0].label; },
-                                label: function (ctx) {
-                                    if (ctx.raw === null || ctx.raw === undefined) return null;
-                                    return ' ' + ctx.dataset.label + ': $' +
-                                        ctx.raw.toLocaleString('es-AR', { minimumFractionDigits: 2 });
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: { color: 'rgba(0,0,0,0.04)' },
-                            ticks: { callback: function (v) { return '$' + v.toLocaleString('es-AR'); } }
-                        },
-                        x: { grid: { display: false } }
-                    }
+            serverTiposData.forEach(item => {
+                if (item.precios && item.precios.length > 0) {
+                    tiposDataCache[String(item.id)] = {
+                        descripcion: item.descripcion,
+                        precios: item.precios
+                    };
                 }
             });
-        }
 
-        // ===== Wait for config tab to become visible before initial render =====
-        // (Alpine x-cloak hides the tab; chart won't render on a hidden canvas)
-        var configTabInitialized = false;
-        function initConfigTabOnVisible() {
-            var configTab = document.querySelector('[x-show="activeTab === \'config\'"]');
-            if (!configTab) return;
-            var observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (m) {
-                    if (m.attributeName === 'style' || m.attributeName === 'class') {
-                        var hidden = configTab.style.display === 'none' || configTab.classList.contains('hidden');
-                        if (!hidden && !configTabInitialized) {
-                            configTabInitialized = true;
-                            // Select all checkboxes and render chart now that canvas has real dimensions
-                            toggleAllTipos(true);
-                        } else if (!hidden && configTabInitialized && configChart) {
-                            configChart.resize();
+            // ===== Fetch prices (fallback/update) =====
+            async function fetchPreciosForTipo(id, nombre) {
+                if (tiposDataCache[id]) return tiposDataCache[id];
+                try {
+                    const r = await fetch('/tareas/api/precios/' + id);
+                    if (r.ok) {
+                        const precios = await r.json();
+                        precios.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                        tiposDataCache[id] = { descripcion: nombre, precios };
+                        return tiposDataCache[id];
+                    }
+                } catch (e) {
+                    console.error('Error fetching precios para tipo ' + id, e);
+                }
+                return { descripcion: nombre, precios: [] };
+            }
+
+            // ===== Render chart =====
+            async function renderConfigChart() {
+                console.log('renderConfigChart called. selectedConfigTipos size:', selectedConfigTipos.size);
+                const noData = document.getElementById('configNoData');
+                const chartContainer = document.getElementById('configChartContainer');
+                if (!noData || !chartContainer) return;
+
+                if (selectedConfigTipos.size === 0) {
+                    console.warn('No hay tipos seleccionados en el Set.');
+                    chartContainer.classList.add('hidden');
+                    noData.classList.remove('hidden');
+                    noData.querySelector('p').textContent = 'Seleccione tipos de tarea para ver la fluctuación';
+                    if (configChart) { configChart.destroy(); configChart = null; }
+                    return;
+                }
+
+                const fetchPromises = [];
+                selectedConfigTipos.forEach(id => {
+                    const cb = document.querySelector('.tipo-checkbox[data-id="' + id + '"]');
+                    const nombre = cb ? cb.getAttribute('data-nombre') : 'Tipo ' + id;
+                    fetchPromises.push(fetchPreciosForTipo(id, nombre));
+                });
+                const results = await Promise.all(fetchPromises);
+                const active = results.filter(t => t.precios && t.precios.length > 0);
+
+                if (active.length === 0) {
+                    chartContainer.classList.add('hidden');
+                    noData.classList.remove('hidden');
+                    noData.querySelector('p').textContent = 'Los tipos seleccionados no tienen precios registrados';
+                    if (configChart) { configChart.destroy(); configChart = null; }
+                    return;
+                }
+
+                console.log('Rendering chart for active tipos:', active.map(t => t.descripcion));
+                noData.querySelector('p').textContent = 'Seleccione tipos de tarea para ver la fluctuación';
+                chartContainer.classList.remove('hidden');
+                noData.classList.add('hidden');
+
+                const allDatesSet = new Set();
+                active.forEach(t => t.precios.forEach(p => allDatesSet.add(p.fecha)));
+                const allDates = Array.from(allDatesSet).sort();
+                const labels = allDates.map(d =>
+                    new Date(d + 'T00:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: '2-digit' })
+                );
+
+                const datasets = active.map((t, i) => {
+                    const color = configPalette[i % configPalette.length];
+                    const byDate = {};
+                    t.precios.forEach(p => { byDate[p.fecha] = p.valor; });
+                    return {
+                        label: t.descripcion,
+                        data: allDates.map(d => byDate[d] !== undefined ? byDate[d] : null),
+                        borderColor: color,
+                        backgroundColor: color + '18',
+                        pointBackgroundColor: color,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        borderWidth: 2.5,
+                        fill: false,
+                        tension: 0.3,
+                        spanGaps: true
+                    };
+                });
+
+                if (configChart) { configChart.destroy(); configChart = null; }
+                const canvas = document.getElementById('configPriceChart');
+                if (!canvas) return;
+                configChart = new Chart(canvas.getContext('2d'), {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: active.length > 1,
+                                position: 'top',
+                                labels: { usePointStyle: true, padding: 14, font: { size: 11 } }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(17,24,39,0.92)',
+                                padding: 10,
+                                callbacks: {
+                                    title: ctx => 'Fecha: ' + ctx[0].label,
+                                    label: ctx => {
+                                        if (ctx.raw === null || ctx.raw === undefined) return null;
+                                        return ' ' + ctx.dataset.label + ': $' +
+                                            ctx.raw.toLocaleString('es-AR', { minimumFractionDigits: 2 });
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                grid: { color: 'rgba(0,0,0,0.04)' },
+                                ticks: { callback: v => '$' + v.toLocaleString('es-AR') }
+                            },
+                            x: { grid: { display: false } }
                         }
                     }
                 });
-            });
-            observer.observe(configTab, { attributes: true });
-        }
+                // Force resize after potential transitions
+                setTimeout(() => { if (configChart) configChart.resize(); }, 100);
+            }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Bind checkbox change events
-            document.querySelectorAll('.tipo-checkbox').forEach(function (cb) {
-                cb.addEventListener('change', function () {
-                    var id = this.getAttribute('data-id');
-                    if (this.checked) selectedConfigTipos.add(id);
+            // ===== Toggle all checkboxes =====
+            function toggleAllTipos(select) {
+                document.querySelectorAll('.tipo-checkbox').forEach(cb => {
+                    cb.checked = select;
+                    const id = cb.getAttribute('data-id');
+                    if (select) selectedConfigTipos.add(id);
                     else selectedConfigTipos.delete(id);
-                    renderConfigChart();
                 });
+                renderConfigChart();
+            }
+
+            // ===== Delete confirmation =====
+            function confirmDeleteTipoInline(el) {
+                const url = el.getAttribute('data-url');
+                const nombre = el.getAttribute('data-nombre');
+                if (typeof showConfirmModal === 'function') {
+                    showConfirmModal('¿Eliminar tipo de tarea?',
+                        'Se eliminará el tipo "' + nombre + '". Esta acción no se puede deshacer.',
+                        'Sí, eliminar', function () { window.location.href = url; });
+                } else {
+                    if (confirm('¿Eliminar "' + nombre + '"?')) window.location.href = url;
+                }
+            }
+            function confirmDeleteTipo(el) { confirmDeleteTipoInline(el); }
+
+            // ===== Watch config tab becoming visible =====
+            let configTabInitialized = false;
+            async function handleConfigTabVisible() {
+                console.log('handleConfigTabVisible triggered. Initialized:', configTabInitialized);
+                if (!configTabInitialized) {
+                    configTabInitialized = true;
+                    // Since we pre-checked in HTML, we just need to render
+                    renderConfigChart();
+                } else {
+                    if (configChart) configChart.resize();
+                    renderConfigChart();
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Bind checkbox change events
+                document.querySelectorAll('.tipo-checkbox').forEach(cb => {
+                    // Listen for changes
+                    cb.addEventListener('change', function () {
+                        console.log('Checkbox changed:', this.getAttribute('data-id'), 'Checked:', this.checked);
+                        const id = this.getAttribute('data-id');
+                        if (this.checked) selectedConfigTipos.add(id);
+                        else selectedConfigTipos.delete(id);
+                        renderConfigChart();
+                    });
+
+                    // Synchronize initial state
+                    if (cb.checked) selectedConfigTipos.add(cb.getAttribute('data-id'));
+                });
+
+                // Initial check if we are already in config tab
+                const configTab = document.querySelector('[x-show="activeTab === \'config\'"]');
+                if (configTab && configTab.style.display !== 'none') {
+                    handleConfigTabVisible();
+                }
+
+                // Watch for tab visibility via MutationObserver (backup for Alpine $watch)
+                if (configTab) {
+                    const observer = new MutationObserver(() => {
+                        const isVisible = configTab.style.display !== 'none' && !configTab.hasAttribute('hidden');
+                        if (isVisible) handleConfigTabVisible();
+                    });
+                    observer.observe(configTab, { attributes: true, attributeFilter: ['style', 'hidden'] });
+                }
             });
 
-            // Start watching for tab visibility
-            initConfigTabOnVisible();
+            // When a price is saved in the modal, invalidate cache and re-render
+            window.addEventListener('price-updated', function (e) {
+                const tipoId = e && e.detail ? String(e.detail.tipoId) : null;
+                if (tipoId) delete tiposDataCache[tipoId];
+                renderConfigChart();
+            });
 
-            // Legacy event support for modals
+            // Legacy view-chart event
             window.addEventListener('view-chart', function (e) {
-                var tipoId = String(e.detail.tipoId);
-                var cb = document.querySelector('.tipo-checkbox[data-id="' + tipoId + '"]');
-                if (cb && !cb.checked) {
+                const tipoId = String(e.detail.tipoId);
+                const cb = document.querySelector('.tipo-checkbox[data-id="' + tipoId + '"]');
+                if (cb) {
                     cb.checked = true;
                     selectedConfigTipos.add(tipoId);
                     renderConfigChart();
                 }
             });
-
-            window.addEventListener('price-updated', function () {
-                window.location.reload();
-            });
-
-            // Modal precios chart (hidden canvas in modal)
-            window.updateChartData = async function (tipoId, tipoNombre) {
-                window.currentTipoNombre = tipoNombre;
-                try {
-                    var r = await fetch('/tareas/api/precios/' + tipoId);
-                    if (r.ok) {
-                        var d = await r.json();
-                        d.sort(function (a, b) { return new Date(a.fecha) - new Date(b.fecha); });
-                        // Also refresh the main config chart if this tipo is selected
-                        var id = String(tipoId);
-                        if (selectedConfigTipos.has(id)) renderConfigChart();
-                    }
-                } catch (e) { console.error(e); }
-            };
-
-            window.addEventListener('open-precios-modal', function (e) {
-                var tipoId = e.detail.tipoId;
-                var tipoNombre = e.detail.tipoNombre;
-                if (window.updateChartData) window.updateChartData(tipoId, tipoNombre);
-            });
-        });
-    </script>
+        </script>
+    </div>
 </body>
 
 </html>

@@ -46,7 +46,8 @@ public class CuentaCorrienteController {
     }
 
     @GetMapping("/{id}")
-    public String detalle(@PathVariable Long id, Model model) {
+    public String detalle(@PathVariable("id") Long id, Model model,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
         CuentaCorriente cuenta = cuentaCorrienteService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuenta corriente no encontrada"));
 
@@ -67,14 +68,25 @@ public class CuentaCorrienteController {
         }
         model.addAttribute("chartLabels", chartLabels);
         model.addAttribute("chartSaldos", chartSaldos);
+        model.addAttribute("isAjax", "XMLHttpRequest".equals(requestedWith));
+
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            return "cuentas-corrientes/detalle :: content-fragment";
+        }
 
         return "cuentas-corrientes/detalle";
     }
 
     @GetMapping("/cliente/{clienteId}")
-    public String detallePorCliente(@PathVariable Long clienteId, RedirectAttributes redirectAttributes) {
+    public String detallePorCliente(@PathVariable("clienteId") Long clienteId,
+            Model model,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+            RedirectAttributes redirectAttributes) {
         try {
             CuentaCorriente cuenta = cuentaCorrienteService.findOrCreateByClienteId(clienteId);
+            if ("XMLHttpRequest".equals(requestedWith)) {
+                return detalle(cuenta.getId(), model, requestedWith);
+            }
             return "redirect:/cuentas-corrientes/" + cuenta.getId();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -83,9 +95,9 @@ public class CuentaCorrienteController {
     }
 
     @PostMapping("/{id}/debito")
-    public String registrarDebito(@PathVariable Long id,
-            @RequestParam String concepto,
-            @RequestParam Double monto,
+    public String registrarDebito(@PathVariable("id") Long id,
+            @RequestParam("concepto") String concepto,
+            @RequestParam("monto") Double monto,
             RedirectAttributes redirectAttributes) {
         try {
             cuentaCorrienteService.registrarDebito(id, concepto, monto);
@@ -98,9 +110,9 @@ public class CuentaCorrienteController {
     }
 
     @PostMapping("/{id}/credito")
-    public String registrarCredito(@PathVariable Long id,
-            @RequestParam String concepto,
-            @RequestParam Double monto,
+    public String registrarCredito(@PathVariable("id") Long id,
+            @RequestParam("concepto") String concepto,
+            @RequestParam("monto") Double monto,
             RedirectAttributes redirectAttributes) {
         try {
             cuentaCorrienteService.registrarCredito(id, concepto, monto);
@@ -113,8 +125,8 @@ public class CuentaCorrienteController {
     }
 
     @PostMapping("/{id}/limite")
-    public String modificarLimite(@PathVariable Long id,
-            @RequestParam Double limite,
+    public String modificarLimite(@PathVariable("id") Long id,
+            @RequestParam("limite") Double limite,
             RedirectAttributes redirectAttributes) {
         try {
             cuentaCorrienteService.setLimiteCredito(id, limite);
@@ -126,7 +138,7 @@ public class CuentaCorrienteController {
     }
 
     @PostMapping("/crear/{clienteId}")
-    public String crearCuenta(@PathVariable Long clienteId, RedirectAttributes redirectAttributes) {
+    public String crearCuenta(@PathVariable("clienteId") Long clienteId, RedirectAttributes redirectAttributes) {
         try {
             CuentaCorriente cuenta = cuentaCorrienteService.findOrCreateByClienteId(clienteId);
             redirectAttributes.addFlashAttribute("success", "Cuenta corriente creada.");

@@ -15,7 +15,8 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Chart.js -->
+    <!-- Global Scripts -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Flatpickr (Global) -->
@@ -79,6 +80,10 @@
 
         .sidebar-link.active svg {
             color: #4ade80;
+        }
+
+        [x-cloak] {
+            display: none !important;
         }
     </style>
 </head>
@@ -154,7 +159,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                <span class="text-sm">Dashboard</span>
+                <span class="text-sm">Inicio</span>
             </a>
 
             <!-- Section: Gestión -->
@@ -429,6 +434,244 @@
     <script th:if="${info}">
         document.addEventListener('DOMContentLoaded', () => showToast('info', '[[${info}]]'));
     </script>
+    <!-- Generic Remote Modal -->
+    <div id="remoteModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+                onclick="closeRemoteModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div id="remoteModalContent"
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full opacity-0 scale-95 duration-200">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 relative">
+                    <button onclick="closeRemoteModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div id="remoteModalBody" class="min-h-[400px]">
+                        <div class="flex justify-center py-10">
+                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function openRemoteModal(url) {
+            const modal = document.getElementById('remoteModal');
+            const content = document.getElementById('remoteModalContent');
+            const body = document.getElementById('remoteModalBody');
+
+            modal.classList.remove('hidden');
+            body.innerHTML = '<div class="flex justify-center py-10"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500"></div></div>';
+
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.text())
+                .then(html => {
+                    body.innerHTML = html;
+                    // Re-run scripts in the injected HTML (for Chart.js)
+                    const scripts = body.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                })
+                .catch(err => {
+                    body.innerHTML = '<div class="p-6 text-center text-red-500">Error al cargar el contenido.</div>';
+                });
+        }
+
+        function closeRemoteModal() {
+            const modal = document.getElementById('remoteModal');
+            const content = document.getElementById('remoteModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRemoteModal(); });
+    </script>
+
+    <!-- Floating Help System (Restricted to Inicio) -->
+    <div x-data="{ 
+            isHome: window.location.pathname === '/',
+            helpOpen: (window.location.pathname === '/') && (localStorage.getItem('agroHelpOpen') === 'true'), 
+            helpMinimized: localStorage.getItem('agroHelpMinimized') !== 'false' 
+        }" x-init="$watch('helpOpen', v => localStorage.setItem('agroHelpOpen', v)); 
+                $watch('helpMinimized', v => localStorage.setItem('agroHelpMinimized', v))" x-show="isHome" x-cloak
+        class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <!-- Help Window -->
+        <div x-show="helpOpen && !helpMinimized" x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+            class="bg-white rounded-2xl shadow-2xl border border-gray-100 w-80 mb-4 overflow-hidden flex flex-col max-h-[500px]">
+
+            <!-- Header -->
+            <div
+                class="bg-gradient-to-r from-green-600 to-green-700 p-4 text-white flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="font-bold tracking-tight">Guía del Sistema</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button @click="helpMinimized = true" class="text-white/70 hover:text-white transition-colors"
+                        title="Minimizar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13H5" />
+                        </svg>
+                    </button>
+                    <button @click="helpOpen = false" class="text-white/70 hover:text-white transition-colors"
+                        title="Cerrar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-4 overflow-y-auto custom-scrollbar">
+                <div class="space-y-6">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-green-50 rounded-lg text-green-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12l9-9 9 9M5 10v10a2 2 0 002 2h3a2 2 0 002-2v-4a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 002 2h3a2 2 0 002-2V10M9 21h6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-green-700 uppercase tracking-[0.2em] mb-1">Inicio</h4>
+                            <p class="text-[13px] text-gray-600 leading-relaxed">Resumen general. Mira aquí para saber
+                                cómo va todo de un vistazo.</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                            </svg>
+                            <h4 class="text-xs font-black text-gray-800 uppercase tracking-[0.2em]">Gestión</h4>
+                        </div>
+                        <div class="space-y-4 ml-2">
+                            <div>
+                                <p class="text-[12px] font-bold text-gray-700 mb-0.5">Clientes</p>
+                                <p class="text-[11px] text-gray-500">Tus compradores y gente con la que haces negocios.
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-[12px] font-bold text-gray-700 mb-0.5">Empleados</p>
+                                <p class="text-[11px] text-gray-500">Lista de tu equipo y sus datos básicos.</p>
+                            </div>
+                            <div>
+                                <p class="text-[12px] font-bold text-gray-700 mb-0.5">Actividades</p>
+                                <p class="text-[11px] text-gray-500">Anota aquí qué se hizo hoy y quién lo hizo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h4 class="text-xs font-black text-gray-800 uppercase tracking-[0.2em]">Finanzas</h4>
+                        </div>
+                        <div class="space-y-4 ml-2">
+                            <div>
+                                <p class="text-[12px] font-bold text-gray-700 mb-0.5">Liquidaciones</p>
+                                <p class="text-[11px] text-gray-500">Paga a tus empleados según lo que trabajaron.</p>
+                            </div>
+                            <div>
+                                <p class="text-[12px] font-bold text-gray-700 mb-0.5">Cuentas Corrientes</p>
+                                <p class="text-[11px] text-gray-500">Control de deudas y pagos pendientes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <h4 class="text-xs font-black text-gray-800 uppercase tracking-[0.2em]">Otros</h4>
+                        </div>
+                        <div class="ml-2">
+                            <p class="text-[12px] font-bold text-gray-700 mb-0.5">Almacenes</p>
+                            <p class="text-[11px] text-gray-500">Controla lo que tienes guardado (insumos,
+                                herramientas).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-3 bg-gray-50 border-t border-gray-100 text-center">
+                <p class="text-[10px] text-gray-400 font-medium">© 2026 AgroSystem - Soporte Inteligente</p>
+            </div>
+        </div>
+
+        <!-- Floating Button -->
+        <button @click="helpOpen = true; helpMinimized = !helpMinimized"
+            class="bg-gradient-to-tr from-green-600 to-green-500 text-white p-4 rounded-full shadow-xl hover:shadow-green-200/50 hover:scale-110 active:scale-95 transition-all group relative overflow-hidden">
+            <div
+                class="absolute inset-0 bg-white/20 transition-transform duration-500 translate-y-full group-hover:translate-y-0">
+            </div>
+            <svg x-show="helpMinimized" class="w-6 h-6 relative z-10" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <svg x-show="!helpMinimized" class="w-6 h-6 relative z-10" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+
+            <!-- Pulse Effect -->
+            <span x-show="helpMinimized" class="absolute inset-0 rounded-full bg-green-400/30 animate-ping"></span>
+        </button>
+    </div>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
 </body>
 
 </html>

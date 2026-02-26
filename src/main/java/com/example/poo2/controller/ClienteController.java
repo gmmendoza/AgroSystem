@@ -46,14 +46,14 @@ public class ClienteController {
     }
 
     @GetMapping("/editar/{id}")
-    public String edit(@PathVariable Long id, Model model) {
+    public String edit(@PathVariable("id") Long id, Model model) {
         clienteService.findById(id).ifPresent(cliente -> model.addAttribute("cliente", cliente));
         model.addAttribute("condicionesFiscales", condicionFiscalRepository.findAll());
         return "clientes/form";
     }
 
     @GetMapping("/eliminar/{id}")
-    public String delete(@PathVariable Long id) {
+    public String delete(@PathVariable("id") Long id) {
         clienteService.deleteById(id);
         return "redirect:/clientes";
     }
