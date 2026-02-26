@@ -3,6 +3,7 @@
 
 <body>
     <div th:fragment="modal" x-data="registroWizard()" @open-registro-modal.window="openModal()"
+        @open-edit-modal.window="openEditModal($event.detail)"
         @price-updated.window="markPriceAsActive($event.detail.tipoId)" class="relative z-10"
         aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;" x-show="isOpen" x-cloak>
 
@@ -26,7 +27,8 @@
 
                     <!-- Header with Steps -->
                     <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center border-b">
-                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Registrar Actividad
+                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title"
+                            x-text="editMode ? 'Editar Actividad' : 'Registrar Actividad'">
                         </h3>
 
                         <!-- Step Indicators -->
@@ -40,8 +42,10 @@
 
                     <!-- Body -->
                     <div class="px-4 py-5 sm:p-6">
-                        <form id="wizardForm" th:action="@{/tareas/registro/guardar}" th:object="${nuevaTarea}"
-                            method="post">
+                        <form id="wizardForm" :action="editMode ? '/tareas/actualizar' : '/tareas/registro/guardar'"
+                            th:object="${nuevaTarea}" method="post">
+                            <input type="hidden" name="id" x-model="formData.id" x-show="editMode">
+                            <input type="hidden" name="empleado.id" :value="selectedEmployees[0]" x-show="editMode">
 
                             <!-- Step 1: Empleados (Multi-select) -->
                             <div x-show="step === 1" x-transition:enter="transition ease-out duration-300 transform"
@@ -244,6 +248,7 @@
             function registroWizard() {
                 return {
                     isOpen: false,
+                    editMode: false,
                     step: 1,
                     empleados: /*[[${empleados}]]*/[],
                     tipos: /*[[${tipos}]]*/[],
@@ -258,6 +263,7 @@
 
                     // Form Data
                     formData: {
+                        id: null,
                         tipoTarea: '',
                         fecha: '',
                         cantidad: ''
@@ -297,12 +303,48 @@
                     },
 
                     resetForm() {
-                        this.formData = { tipoTarea: '', fecha: '', cantidad: '' };
+                        this.editMode = false;
+                        this.formData = { id: null, tipoTarea: '', fecha: '', cantidad: '' };
                         this.selectedEmployees = [];
                         this.search = '';
                         this.selectedTipoName = '';
                         this.minDate = null;
                         if (this.fp) this.fp.clear();
+                    },
+
+                    openEditModal(data) {
+                        this.resetForm();
+                        this.editMode = true;
+                        this.isOpen = true;
+
+                        // Populate data
+                        this.formData.id = data.id;
+                        this.selectedEmployees = [data.empleadoId];
+                        this.formData.tipoTarea = data.tipoTareaId;
+                        this.formData.fecha = data.fecha;
+                        this.formData.cantidad = data.cantidad;
+
+                        // Set names for summary
+                        const tipo = this.tipos.find(t => t.id == data.tipoTareaId);
+                        if (tipo) {
+                            this.selectedTipoName = tipo.descripcion;
+                            this.selectedUnidad = tipo.unidadMedida.nombre;
+                        }
+
+                        // Jump to last step or allow review? User might want to change anything.
+                        // Let's go to step 2 (Task) or 3 (Details). 
+                        // Since we already have everything, maybe step 3 is best. 
+                        this.step = 2; // Start at task selection or continue?
+                        // Actually, let's allow the user to go through steps if they want, 
+                        // but maybe 3 is more direct for corrections.
+                        // Let's go to step 3.
+                        this.step = 3;
+
+                        this.initDatepicker();
+                        this.$nextTick(() => {
+                            if (this.fp) this.fp.setDate(data.fecha);
+                            this.validatePrice();
+                        });
                     },
 
                     selectTipo(tipo) {

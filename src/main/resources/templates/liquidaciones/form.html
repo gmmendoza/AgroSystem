@@ -4,142 +4,107 @@
 <head>
     <title>Nueva Liquidación</title>
 </head>
+<div layout:fragment="content">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Generar Nueva Liquidación</h1>
 
-<body>
-    <div layout:fragment="breadcrumbs">
-        <nav class="flex" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-green-600">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
-                            </path>
-                        </svg>
-                        Inicio
-                    </a>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        <a href="/liquidaciones"
-                            class="ml-1 text-sm font-medium text-gray-500 hover:text-green-600 md:ml-2">Liquidaciones</a>
-                    </div>
-                </li>
-                <li aria-current="page">
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Nueva</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
-    </div>
-
-    <div layout:fragment="content">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Generar Nueva Liquidación</h1>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Formulario -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    Datos del Período
-                </h2>
-                <form id="liquidacionForm" method="post" th:action="@{/liquidaciones/generar}">
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Empleado *</label>
-                        <select name="empleadoId" id="empleadoId" required
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Formulario -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Datos del Período
+            </h2>
+            <form id="liquidacionForm" method="post" th:action="@{/liquidaciones/generar}">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Empleado *</label>
+                    <select name="empleadoId" id="empleadoId" required
+                        class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-2 focus:ring-green-400"
+                        onchange="cargarPreview()">
+                        <option value="">-- Seleccionar empleado --</option>
+                        <option th:each="emp : ${empleados}" th:value="${emp.id}" th:text="${emp.nombre}"></option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Desde *</label>
+                        <input type="date" name="inicio" id="inicio" required th:value="${inicioMes}"
                             class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-2 focus:ring-green-400"
                             onchange="cargarPreview()">
-                            <option value="">-- Seleccionar empleado --</option>
-                            <option th:each="emp : ${empleados}" th:value="${emp.id}" th:text="${emp.nombre}"></option>
-                        </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Desde *</label>
-                            <input type="date" name="inicio" id="inicio" required th:value="${inicioMes}"
-                                class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-2 focus:ring-green-400"
-                                onchange="cargarPreview()">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Hasta *</label>
-                            <input type="date" name="fin" id="fin" required th:value="${hoy}"
-                                class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-2 focus:ring-green-400"
-                                onchange="cargarPreview()">
-                        </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Hasta *</label>
+                        <input type="date" name="fin" id="fin" required th:value="${hoy}"
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:ring-2 focus:ring-green-400"
+                            onchange="cargarPreview()">
                     </div>
-                    <button type="submit" id="btnGenerar" disabled
-                        class="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded transition-colors">
-                        Generar Liquidación
-                    </button>
-                    <a href="/liquidaciones" class="block text-center mt-3 text-sm text-blue-500 hover:underline">←
-                        Volver</a>
-                </form>
-            </div>
+                </div>
+                <button type="submit" id="btnGenerar" disabled
+                    class="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded transition-colors">
+                    Generar Liquidación
+                </button>
+                <a href="/liquidaciones" class="block text-center mt-3 text-sm text-blue-500 hover:underline">←
+                    Volver</a>
+            </form>
+        </div>
 
-            <!-- Preview -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Vista Previa
-                </h2>
-                <div id="previewPlaceholder" class="text-center py-12 text-gray-400">
-                    <p>Seleccioná un empleado y el período para ver el detalle.</p>
+        <!-- Preview -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Vista Previa
+            </h2>
+            <div id="previewPlaceholder" class="text-center py-12 text-gray-400">
+                <p>Seleccioná un empleado y el período para ver el detalle.</p>
+            </div>
+            <div id="previewContent" class="hidden">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4 text-center">
+                    <p class="text-sm text-green-600 font-semibold">Total a Liquidar</p>
+                    <p class="text-3xl font-bold text-green-700 mt-1" id="previewTotal">$0</p>
+                    <p class="text-xs text-green-500 mt-1" id="previewCantidad">0 actividades</p>
                 </div>
-                <div id="previewContent" class="hidden">
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4 text-center">
-                        <p class="text-sm text-green-600 font-semibold">Total a Liquidar</p>
-                        <p class="text-3xl font-bold text-green-700 mt-1" id="previewTotal">$0</p>
-                        <p class="text-xs text-green-500 mt-1" id="previewCantidad">0 actividades</p>
-                    </div>
-                    <div class="overflow-y-auto max-h-56">
-                        <table class="min-w-full text-sm">
-                            <thead>
-                                <tr class="text-xs text-gray-500 uppercase border-b">
-                                    <th class="py-2 text-left">Fecha</th>
-                                    <th class="py-2 text-left">Tipo</th>
-                                    <th class="py-2 text-right">Cant.</th>
-                                    <th class="py-2 text-right">Precio</th>
-                                    <th class="py-2 text-right">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="previewTable"></tbody>
-                        </table>
-                    </div>
+                <div class="overflow-y-auto max-h-56">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-xs text-gray-500 uppercase border-b">
+                                <th class="py-2 text-left">Fecha</th>
+                                <th class="py-2 text-left">Tipo</th>
+                                <th class="py-2 text-right">Cant.</th>
+                                <th class="py-2 text-right">Precio</th>
+                                <th class="py-2 text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTable"></tbody>
+                    </table>
                 </div>
-                <div id="previewError" class="hidden bg-red-50 border border-red-200 rounded p-4 text-red-600 text-sm">
-                </div>
+            </div>
+            <div id="previewError" class="hidden bg-red-50 border border-red-200 rounded p-4 text-red-600 text-sm">
             </div>
         </div>
     </div>
-
-    <script>
+    <script th:inline="none">
+        console.log('!!! SCRIPT Liquidacion Form LOADED - VERSION 3 !!!');
         let debounceTimer;
+
         function cargarPreview() {
+            console.log('cargarPreview called');
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
-                const empleadoId = document.getElementById('empleadoId').value;
-                const inicio = document.getElementById('inicio').value;
-                const fin = document.getElementById('fin').value;
-                if (!empleadoId || !inicio || !fin) return;
+                const empId = document.getElementById('empleadoId').value;
+                const ini = document.getElementById('inicio').value;
+                const fi = document.getElementById('fin').value;
+                if (!empId || !ini || !fi) {
+                    console.log('Skipping preview: missing fields');
+                    return;
+                }
 
-                fetch(`/liquidaciones/api/preview?empleadoId=${empleadoId}&inicio=${inicio}&fin=${fin}`)
+                console.log('Fetching preview for:', empId, ini, fi);
+                fetch('/liquidaciones/api/preview?empleadoId=' + empId + '&inicio=' + ini + '&fin=' + fi)
                     .then(r => r.json())
                     .then(data => {
                         const content = document.getElementById('previewContent');
@@ -158,28 +123,45 @@
                         errDiv.classList.add('hidden');
                         placeholder.classList.add('hidden');
                         content.classList.remove('hidden');
+
                         document.getElementById('previewTotal').textContent = '$' + data.total.toLocaleString('es-AR', { minimumFractionDigits: 2 });
                         document.getElementById('previewCantidad').textContent = data.cantidad + ' actividades';
 
                         const tbody = document.getElementById('previewTable');
-                        tbody.innerHTML = data.tareas.map(t => `
-                        <tr class="border-b border-gray-100">
-                            <td class="py-1 text-gray-600">${new Date(t.fecha + 'T00:00:00').toLocaleDateString('es-AR')}</td>
-                            <td class="py-1 text-gray-700">${t.tipo}</td>
-                            <td class="py-1 text-right">${t.cantidad}</td>
-                            <td class="py-1 text-right">$${t.precio.toFixed(2)}</td>
-                            <td class="py-1 text-right font-medium">$${t.subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                        </tr>`).join('');
+                        tbody.innerHTML = '';
+
+                        data.tareas.forEach(t => {
+                            const row = document.createElement('tr');
+                            row.className = 'border-b border-gray-100';
+                            const dateStr = new Date(t.fecha + 'T00:00:00').toLocaleDateString('es-AR');
+                            row.innerHTML =
+                                '<td class="py-1 text-gray-600">' + dateStr + '</td>' +
+                                '<td class="py-1 text-gray-700">' + t.tipo + '</td>' +
+                                '<td class="py-1 text-right">' + t.cantidad + '</td>' +
+                                '<td class="py-1 text-right">$' + t.precio.toFixed(2) + '</td>' +
+                                '<td class="py-1 text-right font-medium">$' + t.subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</td>';
+                            tbody.appendChild(row);
+                        });
 
                         document.getElementById('btnGenerar').disabled = data.cantidad === 0;
+                        console.log('Preview update complete. Count:', data.cantidad);
                     })
-                    .catch(() => {
+                    .catch(err => {
+                        console.error('Fetch error:', err);
                         document.getElementById('previewError').classList.remove('hidden');
                         document.getElementById('previewError').textContent = 'Error al cargar los datos.';
                     });
             }, 400);
         }
+
+        // Initial detection
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded in form.html');
+            if (document.getElementById('empleadoId').value) {
+                cargarPreview();
+            }
+        });
     </script>
-</body>
+</div>
 
 </html>

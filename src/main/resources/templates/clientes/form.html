@@ -8,8 +8,15 @@
 <body>
     <div layout:fragment="content">
         <div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800"
-                th:text="${cliente.id == null ? 'Nuevo Cliente' : 'Editar Cliente'}">Nuevo Cliente</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800"
+                    th:text="${cliente.id == null ? 'Nuevo Cliente' : 'Editar Cliente'}">Nuevo Cliente</h2>
+                <a th:if="${cliente.id != null}" href="javascript:void(0)"
+                    th:onclick="'openRemoteModal(\'/cuentas-corrientes/cliente/' + ${cliente.id} + '\')'"
+                    class="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                    Ver Cuenta Corriente →
+                </a>
+            </div>
 
             <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post" id="clienteForm"
                 onsubmit="return validateForm()">

@@ -33,13 +33,13 @@ public class EmpleadoController {
     }
 
     @GetMapping("/editar/{id}")
-    public String edit(@PathVariable Long id, Model model) {
+    public String edit(@PathVariable("id") Long id, Model model) {
         empleadoService.findById(id).ifPresent(empleado -> model.addAttribute("empleado", empleado));
         return "empleados/form";
     }
 
     @GetMapping("/eliminar/{id}")
-    public String delete(@PathVariable Long id) {
+    public String delete(@PathVariable("id") Long id) {
         empleadoService.deleteById(id);
         return "redirect:/empleados";
     }

@@ -78,13 +78,15 @@
                     <tbody class="divide-y divide-gray-100">
                         <tr th:each="cuenta : ${cuentas}" class="hover:bg-gray-50 transition-colors">
                             <td class="py-3 px-5">
-                                <p class="font-semibold text-gray-800" th:text="${cuenta.cliente.nombre}"></p>
+                                <p class="font-semibold text-gray-800 hover:text-green-600 cursor-pointer"
+                                    th:onclick="'openRemoteModal(\'/cuentas-corrientes/' + ${cuenta.id} + '\')'"
+                                    th:text="${cuenta.cliente.nombre}"></p>
                                 <p class="text-xs text-gray-400" th:text="${cuenta.cliente.cuit}"></p>
                             </td>
                             <td class="py-3 px-5 text-right">
                                 <span class="font-bold text-lg"
                                     th:classappend="${cuenta.saldo > 0 ? 'text-red-600' : cuenta.saldo < 0 ? 'text-green-600' : 'text-gray-500'}"
-                                    th:text="${(cuenta.saldo < 0 ? '+$' : cuenta.saldo > 0 ? '-$' : '$') + #numbers.formatDecimal(#math.abs(cuenta.saldo), 0, 'COMMA', 2, 'POINT')}">$0</span>
+                                    th:text="${(cuenta.saldo < 0 ? '+$' : cuenta.saldo > 0 ? '-$' : '$') + #numbers.formatDecimal(T(java.lang.Math).abs(cuenta.saldo), 0, 'COMMA', 2, 'POINT')}">$0</span>
                                 <p class="text-xs text-gray-400"
                                     th:text="${cuenta.saldo > 0 ? 'debe' : cuenta.saldo < 0 ? 'a favor' : 'sin deuda'}">
                                 </p>
@@ -107,9 +109,10 @@
                                 th:text="${cuenta.fechaUltimoMovimiento != null ? #temporals.format(cuenta.fechaUltimoMovimiento, 'dd/MM/yyyy') : 'Sin movimientos'}">
                             </td>
                             <td class="py-3 px-5 text-center">
-                                <a th:href="@{/cuentas-corrientes/{id}(id=${cuenta.id})}"
-                                    class="w-8 h-8 inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-                                    title="Ver detalle">
+                                <a href="javascript:void(0)"
+                                    th:onclick="'openRemoteModal(\'/cuentas-corrientes/' + ${cuenta.id} + '\')'"
+                                    class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                                    title="Ver Detalles">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
